@@ -12,6 +12,7 @@
 2. Create word index for words, which length is greater than 4 and show line numbers, where those words are present.
     - Order words in index lexicographically.
 
+*Solved in [index.hs](index.hs)*
 ### Usefull functions:
 ``` haskell
  > words "car bus plane"
