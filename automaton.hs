@@ -1,3 +1,4 @@
+module Automaton where
 import Data.List -- So we can use sort
 import Data.Maybe
 import Data.Unique

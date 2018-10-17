@@ -76,7 +76,7 @@ deriv (Var x) y | x == y    = Num 1
 deriv (Add x y) z  = Add (deriv x z) (deriv y z)
 deriv (Sub x y) z  = Sub (deriv x z) (deriv y z)
 deriv (Mul x y) z  = Add (Mul (deriv x z) y) (Mul x (deriv y z))
---deriv (Div x y)  = deriv x `div` deriv y
+deriv (Div x y) z  = Div (Sub (Mul (deriv x z) y) (Mul x (deriv y z))) (Mul y y)
 
 data RegularExpression = Symb Char
                         | Iter RegularExpression

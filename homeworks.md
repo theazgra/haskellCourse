@@ -2,14 +2,14 @@
 # Homeworks
 ## Automaton
 
-1. Transformation of non-deterministic automaton to deterministic one.
-2. Print transition table
+1. [x] Transformation of non-deterministic automaton to deterministic one.
+2. [x] Print transition table
 
-*Solved in [automata.hs](automata.hs)*
+*Solved in [automata.hs](automaton.hs)*
 
 ## Text align and word index
-1. Align input string to line width
-2. Create word index for words, which length is greater than 4 and show line numbers, where those words are present.
+1. [x] Align input string to line width
+2. [x] Create word index for words, which length is greater than 4 and show line numbers, where those words are present.
     - Order words in index lexicographically.
 
 
@@ -25,9 +25,9 @@
 *Second part is solved in [index.hs](index.hs)*
 
 ## Regular Expressions
-1. Transform regular expression (re1) to finite automaton. (Non-Deterministic *[with empty word transitions]*) *(10 pts)*
-2. `BONUS:` Implement generalNonDeterministic step *(2.5-5 pts)*
-3. `BONUS:` Transformation of general non deterministic automaton to deterministic *(2.5-5 pts)*
+1. [ ] Transform regular expression (re1) to finite automaton. (Non-Deterministic *[with empty word transitions]*) *(10 pts)*
+2. [x] `BONUS:` Implement generalNonDeterministic step *(2.5-5 pts)*
+3. [ ] `BONUS:` Transformation of general non deterministic automaton to deterministic *(2.5-5 pts)*
 
 ```haskell
 data RegularExpression = Symb Char
