@@ -25,7 +25,7 @@
 *Second part is solved in [index.hs](index.hs)*
 
 ## Regular Expressions
-1. [ ] Transform regular expression (re1) to finite automaton. (Non-Deterministic *[with empty word transitions]*) *(10 pts)*
+1. [x] Transform regular expression (re1) to finite automaton. (Non-Deterministic *[with empty word transitions]*) *(10 pts)*
 2. [x] `BONUS:` Implement generalNonDeterministic step *(2.5-5 pts)*
 3. [ ] `BONUS:` Transformation of general non deterministic automaton to deterministic *(2.5-5 pts)*
 
