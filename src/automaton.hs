@@ -198,11 +198,11 @@ enToDeterministic (_, is, fs, a, trans) = ttToDt a (nub (convertTransitions [is 
     convertTransitions (x:xs) ad
         | Data.List.null ([x] Data.List.\\ ad) = convertTransitions xs ad
         | otherwise =   let 
-                            tmpCV = [(x, s, nub [d | (o,ts,d) <- trans, (elem o x) && (isCharacter ts s)], (x == is), (isFinal x) ) | s <- a ]
-                            newStates = (nub [dest | (_,_,dest,_,_) <- tmpCV])
-                        in [(a,b,(c ++ epsilonConnectedStates c trans),d,e) | (a,b,c,d,e) <- tmpCV] ++ 
-                            convertTransitions xs (x : ad) ++ 
-                            convertTransitions [ ns ++ (epsilonConnectedStates ns trans) | ns <- newStates] (x : ad)
+                        tmpCV = [(x, s, nub [d | (o,ts,d) <- trans, (elem o x) && (isCharacter ts s)], (x == is), (isFinal x) ) | s <- a ]
+                        newStates = (nub [dest | (_,_,dest,_,_) <- tmpCV])
+                    in [((sort a),b,sort (c ++ epsilonConnectedStates c trans), ((sort a) == sort (is ++ epsilonConnectedStates is trans)),e) | (a,b,c,d,e) <- tmpCV] ++ 
+                        convertTransitions xs (x : ad) ++ 
+                        convertTransitions [ ns ++ (epsilonConnectedStates ns trans) | ns <- newStates] (x : ad)
                         
     isFinal :: [Int] -> Bool
     isFinal stateList = (length [s | s <- stateList, elem s fs]) > 0
