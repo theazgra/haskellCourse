@@ -22,6 +22,37 @@ type ConvertedTransition = ([Int],Char,[Int],Bool,Bool)
 --ConvertedTransitions, Initial state, final states
 type ConvertInfo = ([Transition], Int, [Int])
 
+data Symbol = Symbol Char
+            | Epsilon
+
+symbEq :: Symbol -> Symbol -> Bool
+symbEq (Symbol a) (Symbol b)    = a == b
+symbEq Epsilon Epsilon          = True
+symbEq _ _                      = False
+
+symbShow :: Symbol -> String
+symbShow (Symbol a) = [a]
+symbShow Epsilon    = "Epsilon"
+
+instance Eq Symbol where
+    a == b  = symbEq a b
+instance Show Symbol where
+    show a = symbShow a
+
+type ETransition = (Int, Symbol, Int)
+
+type ENonDeterministicAutomaton = (Int, [Int], [Int], String, [ETransition]) 
+
+isEpsilon :: Symbol -> Bool
+isEpsilon Epsilon   = True
+isEpsilon _         = False
+
+isCharacter :: Symbol -> Char -> Bool
+isCharacter symb c =  case symb of
+                        Epsilon -> False
+                        Symbol s -> (s == c)
+
+
 -- Example of automatons.
 ex1 :: DeterministicAutomaton
 ex1 = (3, 0, [2], "ab", [(0,'a',1), (0,'b',0), (1,'a',1),(1,'b',2), (2,'a',1), (2,'b',0)])
@@ -154,3 +185,41 @@ toDeterministic (_, is, fs, a, trans) = ttToDt a (convertTransitions [is] []) wh
     
     isFinal :: [Int] -> Bool
     isFinal stateList = (length [s | s <- stateList, elem s fs]) > 0
+
+epsilonConnectedStates :: [Int] -> [ETransition] -> [Int]
+epsilonConnectedStates [] _                 = []
+epsilonConnectedStates states transitions   =   let ecs = [ds | (os, s, ds) <- transitions, elem os states, isEpsilon s]
+                                                in ecs ++ epsilonConnectedStates ecs transitions
+
+enToDeterministic :: ENonDeterministicAutomaton -> DeterministicAutomaton
+enToDeterministic (_, is, fs, a, trans) = ttToDt a (nub (convertTransitions [is ++ (epsilonConnectedStates is trans)] [])) where
+    convertTransitions :: [[Int]] -> [[Int]] -> [ConvertedTransition]
+    convertTransitions [] _ = []
+    convertTransitions (x:xs) ad
+        | Data.List.null ([x] Data.List.\\ ad) = convertTransitions xs ad
+        | otherwise =   let 
+                            tmpCV = [(x, s, nub [d | (o,ts,d) <- trans, (elem o x) && (isCharacter ts s)], (x == is), (isFinal x) ) | s <- a ]
+                            newStates = (nub [dest | (_,_,dest,_,_) <- tmpCV])
+                        in [(a,b,(c ++ epsilonConnectedStates c trans),d,e) | (a,b,c,d,e) <- tmpCV] ++ 
+                            convertTransitions xs (x : ad) ++ 
+                            convertTransitions [ ns ++ (epsilonConnectedStates ns trans) | ns <- newStates] (x : ad)
+                        
+    isFinal :: [Int] -> Bool
+    isFinal stateList = (length [s | s <- stateList, elem s fs]) > 0
+
+eNTest :: ENonDeterministicAutomaton -> String -> Bool
+eNTest (_,start,finalStates,_,transitions) word =   let wordFinalStates = (eStep word (start ++ epsilonConnectedStates start transitions) transitions) 
+                                                    in elem True [elem x finalStates | x <- wordFinalStates] 
+
+eStep :: String -> [Int] -> [ETransition] -> [Int]
+eStep [] finalStates _                  = finalStates
+eStep (x:xs) currentStates transitions  =   let newStates = [ ds | (os, s, ds) <- transitions, checkETransition os s]
+                                            in eStep xs (newStates ++ epsilonConnectedStates newStates transitions) transitions where
+                                                checkETransition :: Int -> Symbol -> Bool
+                                                checkETransition os (Symbol c)  = elem os currentStates && c == x
+                                                checkETransition _ _            = False
+
+-- mfn :: Maybe Int -> String
+-- mfn x = case x of 
+--     Nothing -> "Nothing"
+--     Just y -> show y

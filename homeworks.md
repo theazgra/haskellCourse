@@ -5,7 +5,7 @@
 1. [x] Transformation of non-deterministic automaton to deterministic one.
 2. [x] Print transition table
 
-*Solved in [automata.hs](automaton.hs)*
+*Solved in [automata.hs](src/automaton.hs)*
 
 ## Text align and word index
 1. [x] Align input string to line width
@@ -21,13 +21,15 @@
  ["car","bus","plane"]
 ```
 
-*First part is solved in [textAlign.hs](textAlign.hs)*
-*Second part is solved in [index.hs](index.hs)*
+*First part is solved in [textAlign.hs](src/textAlign.hs)*
+*Second part is solved in [index.hs](src/index.hs)*
 
 ## Regular Expressions
-1. [x] Transform regular expression (re1) to finite automaton. (Non-Deterministic *[with empty word transitions]*) *(10 pts)*
+1. [] Transform regular expression (re1) to finite automaton. (Non-Deterministic *[with empty word transitions]*) *(10 pts)*
+    - [x] Working for reA,reAB
+    - [ ] Not working for reTest
 2. [x] `BONUS:` Implement generalNonDeterministic step *(2.5-5 pts)*
-3. [ ] `BONUS:` Transformation of general non deterministic automaton to deterministic *(2.5-5 pts)*
+3. [x] `BONUS:` Transformation of general non deterministic automaton to deterministic *(2.5-5 pts)*
 
 ```haskell
 data RegularExpression = Symb Char

@@ -46,6 +46,16 @@
 			"Iter ($1)"
 		],
 		"description": "Insert Regular expression iteration"
+	},
+	"Method comment": {
+		"scope": "haskell",
+		"prefix": "cmnt",
+		"body": [
+			"{- |",
+			"	$1",
+			"-}",
+		],
+		"description": "Insert Regular expression iteration"
 	}
 	
 }

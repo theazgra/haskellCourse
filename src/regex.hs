@@ -1,42 +1,27 @@
 module Regex where
 import Automaton
 import Data.List
-import Test.HUnit   
+import Data.Maybe
+import Data.Map (Map)
+import qualified Data.Map as Map
 
-data Symbol = Symbol Char
-            | Epsilon
 
-symbEq :: Symbol -> Symbol -> Bool
-symbEq (Symbol a) (Symbol b)    = a == b
-symbEq Epsilon Epsilon          = True
-symbEq _ _                      = False
-
-symbShow :: Symbol -> String
-symbShow (Symbol a) = [a]
-symbShow Epsilon    = "Epsilon"
-
-instance Eq Symbol where
-    a == b  = symbEq a b
-instance Show Symbol where
-    show a = symbShow a
-
-type ETransition = (Int, Symbol, Int)
-
-type ENonDeterministicAutomaton = (Int, [Int], [Int], String, [ETransition]) 
-
+{- |
+    Data type defining regular expression tree.
+        RESymb  - Regular symbol from alphabet or Epsilon (word of length = 0)
+        Iter    - Iteration. e.g. (a*)
+        Conc    - Concatenation. e.g. (ab) 
+        Or      - Logic `or` or union. e.g. (a + b)
+-}
 data RegularExpression = RESymb Symbol
                         | Iter RegularExpression
-                        | Conc RegularExpression RegularExpression -- Concatenation
+                        | Conc RegularExpression RegularExpression
                         | Or RegularExpression RegularExpression
                         deriving (Eq,Show)
 
 --     (a+b)*ab
 reTest :: RegularExpression
 reTest = Conc (Conc (Iter (Or (RESymb (Symbol 'a')) (RESymb (Symbol 'b')))) (RESymb (Symbol 'a'))) (RESymb (Symbol 'b'))
-
-isEpsilon :: Symbol -> Bool
-isEpsilon Epsilon   = True
-isEpsilon _         = False
 
 epsAutEx :: ENonDeterministicAutomaton
 epsAutEx = (5, [0], [0,4], "ab", [
@@ -46,23 +31,6 @@ epsAutEx = (5, [0], [0,4], "ab", [
 
 epsAutEx2 :: ENonDeterministicAutomaton
 epsAutEx2 = (3, [0], [0], "ab", [(0,(Symbol 'b'),1),(0,Epsilon,2),(1,(Symbol 'a'),1),(1,(Symbol 'a'),2),(1,(Symbol 'b'),2),(2,(Symbol 'a'),0)])
-
-epsilonConnectedStates :: [Int] -> [ETransition] -> [Int]
-epsilonConnectedStates [] _                 = []
-epsilonConnectedStates states transitions   =   let ecs = [ds | (os, s, ds) <- transitions, elem os states, isEpsilon s]
-                                                in ecs ++ epsilonConnectedStates ecs transitions
-
-eNTest :: ENonDeterministicAutomaton -> String -> Bool
-eNTest (_,start,finalStates,_,transitions) word =   let wordFinalStates = (eStep word (start ++ epsilonConnectedStates start transitions) transitions) 
-                                                    in elem True [elem x finalStates | x <- wordFinalStates] 
-
-eStep :: String -> [Int] -> [ETransition] -> [Int]
-eStep [] finalStates _                  = finalStates
-eStep (x:xs) currentStates transitions  =   let newStates = [ ds | (os, s, ds) <- transitions, checkETransition os s]
-                                            in eStep xs (newStates ++ epsilonConnectedStates newStates transitions) transitions where
-                                                checkETransition :: Int -> Symbol -> Bool
-                                                checkETransition os (Symbol c)  = elem os currentStates && c == x
-                                                checkETransition _ _            = False
 
 --(Int, [Int], [Int], String, [ETransition]) 
 regexToNfa :: RegularExpression -> ENonDeterministicAutomaton
@@ -81,6 +49,9 @@ renameTrans transitions offset = map (\t -> offsetTransition t offset) transitio
 renameStates :: [Int] -> Int -> [Int]
 renameStates original offset = [ (x+offset) | x <- original]
 
+{- |
+    Union of two epsilon NFA.
+-}
 nfaUnion :: ENonDeterministicAutomaton -> ENonDeterministicAutomaton -> ENonDeterministicAutomaton
 nfaUnion (aSc,aS,aF,aAlph,aT) (bSc,bS,bF,bAlph,bT) =    ((2 + aSc + bSc), 
                                                         [0], 
@@ -93,6 +64,9 @@ nfaUnion (aSc,aS,aF,aAlph,aT) (bSc,bS,bF,bAlph,bT) =    ((2 + aSc + bSc),
                                                             [(bf,Epsilon,(1 + aSc + bSc)) | bf <- (renameStates bF (aSc + 1))]
                                                         ))
 
+{- |
+    Concatenation of two epsilon NFA.
+-}
 nfaConcat :: ENonDeterministicAutomaton -> ENonDeterministicAutomaton -> ENonDeterministicAutomaton
 nfaConcat (aSc,aS,aF,aAlph,aT) (bSc,bS,bF,bAlph,bT) =   ((aSc + bSc),
                                                         aS,
@@ -100,7 +74,9 @@ nfaConcat (aSc,aS,aF,aAlph,aT) (bSc,bS,bF,bAlph,bT) =   ((aSc + bSc),
                                                         nub(aAlph ++ bAlph),
                                                         (aT ++ [(os, Epsilon, ds)| os <- aF, ds <- (renameStates bS aSc)  ] ++ (renameTrans bT aSc))
                                                         )
-
+{- |
+    Iteration of epsilon NFA
+-}
 nfaIter :: ENonDeterministicAutomaton -> ENonDeterministicAutomaton
 nfaIter (aSc,aS,aF,aAlph,aT) =  (aSc + 1,
                                 [0],
@@ -108,3 +84,15 @@ nfaIter (aSc,aS,aF,aAlph,aT) =  (aSc + 1,
                                 aAlph,
                                 [(0, Epsilon, (s + 1)) | s <- aS] ++ (renameTrans aT 1) ++ [((fs + 1),Epsilon,0) | fs <- aF]
                                 )
+
+{- |
+    Sample regular expression for testing.
+-}
+reA_ex :: RegularExpression
+reA_ex = RESymb (Symbol 'a')
+
+reB_ex :: RegularExpression
+reB_ex = RESymb (Symbol 'b')
+
+reAB_ex :: RegularExpression
+reAB_ex = Conc (RESymb (Symbol 'a')) (RESymb (Symbol 'b'))
