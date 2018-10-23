@@ -1,4 +1,5 @@
 import Test.HUnit
+import Automaton
 import Regex
 
 -- Union tests

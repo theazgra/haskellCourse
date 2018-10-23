@@ -27,6 +27,13 @@ reA_dt_GT = (1,0,[1],"a",[(0,'a',1),(1,'a',2),(2,'a',2)])
 reAB_dt_GT :: DeterministicAutomaton
 reAB_dt_GT = (4,0,[3],"ab",[(0,'a',1),(0,'b',2),(1,'a',2),(1,'b',3),(2,'a',2),(2,'b',2),(3,'a',2),(3,'b',2)])
 
+--     (a+b)*ab
+re3 :: RegularExpression
+re3 = Conc (Conc (Iter (Or (RESymb (Symbol 'a')) (RESymb (Symbol 'b')))) (RESymb (Symbol 'a'))) (RESymb (Symbol 'b'))
+
+re3_dt_GT :: DeterministicAutomaton
+re3_dt_GT = (4,0,[3],"ab",[(0,'a',1),(0,'b',2),(1,'a',1),(1,'b',3),(2,'a',1),(2,'b',2),(3,'a',1),(3,'b',2)])
+
 
 nfa2dfa_1 = TestCase (
     assertEqual "Conversion of NFA (nd1) to DFA"
@@ -48,10 +55,15 @@ re_dfa_2 = TestCase (
     assertEqual "Regular expression (ab) to DFA."
     True
     ((enToDeterministic (regexToNfa reAB)) == reAB_dt_GT))
+
+re_dfa_3 = TestCase (
+        assertEqual "Regular expression (a+b)*ab to DFA."
+        True
+        ((enToDeterministic (regexToNfa re3)) == re3_dt_GT))
     
 
 tests = TestList [
-    nfa2dfa_1, nfa2dfa_2, re_dfa_1, re_dfa_2
+    nfa2dfa_1, nfa2dfa_2, re_dfa_1, re_dfa_2, re_dfa_3
     ]
 
 
