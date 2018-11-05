@@ -25,9 +25,7 @@
 *Second part is solved in [index.hs](src/index.hs)*
 
 ## Regular Expressions
-1. [] Transform regular expression (re1) to finite automaton. (Non-Deterministic *[with empty word transitions]*) *(10 pts)*
-    - [x] Working for reA,reAB
-    - [ ] Not working for reTest
+1. [x] Transform regular expression (re1) to finite automaton. (Non-Deterministic *[with empty word transitions]*) *(10 pts)*
 2. [x] `BONUS:` Implement generalNonDeterministic step *(2.5-5 pts)*
 3. [x] `BONUS:` Transformation of general non deterministic automaton to deterministic *(2.5-5 pts)*
 
@@ -47,6 +45,9 @@ data Symbol = Symbol Char
             | Epsilon
 
 ```
+
+## Context-free Grammar
+Course project. Operations with context-free grammar.
 
 
 

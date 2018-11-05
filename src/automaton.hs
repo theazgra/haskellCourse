@@ -219,7 +219,3 @@ eStep (x:xs) currentStates transitions  =   let newStates = [ ds | (os, s, ds) <
                                                 checkETransition os (Symbol c)  = elem os currentStates && c == x
                                                 checkETransition _ _            = False
 
--- mfn :: Maybe Int -> String
--- mfn x = case x of 
---     Nothing -> "Nothing"
---     Just y -> show y
