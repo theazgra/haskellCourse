@@ -57,8 +57,11 @@ tryFindRule :: [Rule] -> RuleRight -> Maybe Rule
 tryFindRule rules wantedRight = let filter = [ (a,rightSide) | (a,rightSide) <- rules, rightSide == wantedRight]
                                 in if (length filter) == 1 then Just (head filter) else Nothing
 
-regexToCFG :: RegularExpression -> [Rule]
-regexToCFG regEx = nub(convertRegex regEx []) where
+regexToCFG :: RegularExpression -> ContextFreeGrammar
+regexToCFG regEx =  let 
+                        rules = nub(convertRegex regEx []) 
+                        (nt,_) = head rules
+                    in (nt, rules) where
     convertRegex :: RegularExpression -> [Rule] -> [Rule]
     convertRegex (RESymb s) r   = case s of Epsilon ->  let foundRule = tryFindRule r (SR (Terminal CFGEpsilon))
                                                         in if isJust foundRule then 
