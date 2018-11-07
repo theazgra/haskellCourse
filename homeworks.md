@@ -49,6 +49,16 @@ data Symbol = Symbol Char
 ## Context-free Grammar
 Course project. Operations with context-free grammar.
 
+### Ideas for algorithms
+1. Automaton to context-free grammar
+2. Regular expression to context-free grammar
+3. Check if grammar is left-regular or right-regular (*So check if grammar is regular*)
+4. Reduction of context-free grammar
+5. Removal of `epsilon rules`
+6. Removal of `simple rules`
+7. Context-free grammar to chomsky normal form
+8. *Cocke-Younger-Kasami algorithm, (only if there is time)*
+
 
 
 
