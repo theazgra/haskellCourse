@@ -51,7 +51,7 @@ Course project. Operations with context-free grammar.
 
 ### Ideas for algorithms
 - [x] Regular expression to context-free grammar
-- [ ] Automaton to context-free grammar
+- [x] Automaton to context-free grammar
 - [ ] Check if grammar is left-regular or right-regular (*So check if grammar is regular*)
 - [ ] Reduction of context-free grammar
 - [ ] Removal of `epsilon rules`

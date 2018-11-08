@@ -34,8 +34,7 @@ module Automaton (
     --ConvertedTransitions, Initial state, final states
     type ConvertInfo = ([Transition], Int, [Int])
 
-    data Symbol = Symbol Char
-                | Epsilon
+    data Symbol = Symbol Char | Epsilon
 
     symbEq :: Symbol -> Symbol -> Bool
     symbEq (Symbol a) (Symbol b)    = a == b

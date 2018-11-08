@@ -58,10 +58,9 @@ tryFindRule rules wantedRight = let filter = [ (a,rightSide) | (a,rightSide) <- 
                                 in if (length filter) == 1 then Just (head filter) else Nothing
 
 regexToCFG :: RegularExpression -> ContextFreeGrammar
-regexToCFG regEx =  let 
-                        rules = nub(convertRegex regEx []) 
-                        (nt,_) = head rules
-                    in (nt, rules) where
+regexToCFG regEx =  let rules = nub(convertRegex regEx []) 
+                        (nt,_) = head rules 
+                        in (nt, rules) where
     convertRegex :: RegularExpression -> [Rule] -> [Rule]
     convertRegex (RESymb s) r   = case s of Epsilon ->  let foundRule = tryFindRule r (SR (Terminal CFGEpsilon))
                                                         in if isJust foundRule then 
@@ -75,18 +74,16 @@ regexToCFG regEx =  let
                                                             [("S" ++ (show (length r)), (SR (Terminal (CFGSymbol s))))]
 
     convertRegex (Or a b) r     =   let 
-                                        i = length r
                                         aRules = convertRegex a r
                                         bRules = (convertRegex b (r ++ aRules))
-                                        offset = (length aRules) + (length bRules) + i
+                                        offset = (length aRules) + (length bRules) + (length r)
                                     in [("S" ++ (show offset), (SR (Nonterminal nt))) | (nt,_) <- [head aRules, head bRules]] 
                                         ++ aRules ++ bRules
     
     convertRegex (Conc a b) r   =   let 
-                                        i = length r
                                         aRules = convertRegex a r
                                         bRules = (convertRegex b (r ++ aRules))
-                                        offset = (length aRules) + (length bRules) + i
+                                        offset = (length aRules) + (length bRules) + (length r)
                                     in [(("S" ++ (show offset)), (CR [ Nonterminal nt | (nt,_) <- [head aRules, head bRules]]))] 
                                         ++ aRules ++ bRules
                                         
@@ -96,3 +93,18 @@ regexToCFG regEx =  let
                                         epsRule = (epsRuleNt, (SR (Terminal CFGEpsilon)))
                                         (lastNt,_) = head rules
                                     in [epsRule] ++ [(epsRuleNt,(CR [Nonterminal lastNt, Nonterminal epsRuleNt]))] ++ rules
+
+aut1 :: ENonDeterministicAutomaton
+aut1 = (5,[1,3],[1,5],"ab",[  (1,(Symbol 'a'),2),(1,(Symbol 'a'),3),(1,(Symbol 'b'),1),(2,(Symbol 'b'),5),(2,(Symbol 'a'),4),
+                            (3,(Symbol 'b'),4),(4,(Symbol 'b'),3),(4,(Symbol 'b'),5),(4,Epsilon,1),(5,(Symbol 'b'),5)])
+
+eAutToCFG :: ENonDeterministicAutomaton -> ContextFreeGrammar
+eAutToCFG (_,is,fs,_,trans) =   let
+                                    initialNts  = [ ("I", (SR (Nonterminal ("S" ++ (show s))))) | s <- is]
+                                    rules       = [ generateRule t | t <- trans ]
+                                    finalRules  = [ (("S" ++ (show s)), (SR (Terminal CFGEpsilon))) | s <- fs ]
+                                in ("I", initialNts ++ rules ++ finalRules) where
+    generateRule :: ETransition -> Rule
+    generateRule (is,s,fs) = case s of 
+                            Symbol symb -> (("S" ++ (show is)), (CR [(Terminal (CFGSymbol symb)),(Nonterminal ("S" ++ (show fs)))] ))
+                            Epsilon     -> (("S" ++ (show is)), (SR (Nonterminal ("S" ++ (show fs)))))  
