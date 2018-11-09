@@ -1,28 +1,10 @@
 import Regex
 import Automaton hiding (printTransitionTable, printState, ex1)
 import GrammarTypes
+import CfgExamples
 import Data.List
 import Data.Maybe
 import Data.Char
-
--- Rule ContextFreeGrammar  RuleRight TerminalSymbol Terminal Nonterminal NonterminalSymbol GrammarSymbol
-
-
-ruleFromSameNt :: Rule -> Rule -> Bool
-ruleFromSameNt (ntA,_) (ntB,_) = ntA == ntB
-
-ex1 :: ContextFreeGrammar
-ex1 = ("A", [
-    ("A", (CR [ (Terminal(CFGSymbol 'a')), (Nonterminal "B"), (Nonterminal "B"), (Terminal(CFGSymbol 'b'))] )),
-    ("A", (CR [ (Nonterminal "A"), (Terminal (CFGSymbol 'a')) ,(Nonterminal "A") ])),
-    ("B", (SR (Terminal CFGEpsilon))),
-    ("B", (CR [ (Terminal (CFGSymbol 'b')), (Nonterminal "C"), (Nonterminal "A") ])),
-    ("C", (CR [ (Nonterminal "A"), (Nonterminal "B") ])),
-    ("C", (SR (Terminal (CFGSymbol 'a')))),
-    ("C", (SR (Terminal (CFGSymbol 'b'))))
-    ])
-
-
 
 regEx1 :: RegularExpression
 regEx1 = Or (RESymb (Symbol 'a')) (RESymb (Symbol 'b'))
@@ -33,6 +15,9 @@ regEx2 = Conc (Or (RESymb (Symbol 'a')) (RESymb (Symbol 'b'))) (RESymb (Symbol '
 --     (a+b)*ab
 regEx3 :: RegularExpression
 regEx3 = Iter ( Conc (Or (RESymb (Symbol 'a')) (RESymb (Symbol 'b'))) (RESymb (Symbol 'b')) )
+
+ruleFromSameNt :: Rule -> Rule -> Bool
+ruleFromSameNt (ntA,_) (ntB,_) = ntA == ntB
 
 mapWoLast :: (a -> a) -> [a] -> [a]
 mapWoLast f []      = []
@@ -108,3 +93,67 @@ eAutToCFG (_,is,fs,_,trans) =   let
     generateRule (is,s,fs) = case s of 
                             Symbol symb -> (("S" ++ (show is)), (CR [(Terminal (CFGSymbol symb)),(Nonterminal ("S" ++ (show fs)))] ))
                             Epsilon     -> (("S" ++ (show is)), (SR (Nonterminal ("S" ++ (show fs)))))  
+
+
+
+isGsTerminal :: GrammarSymbol -> Bool
+isGsTerminal (Terminal t)   = True
+isGsTerminal _              = False
+
+isRRTerminal :: RuleRight -> Bool
+isRRTerminal (SR gs)    = isGsTerminal gs
+isRRTerminal _          = False
+
+unpackNt :: GrammarSymbol -> NonterminalSymbol
+unpackNt (Nonterminal nt)   = nt
+unpackNt _                  = error "(unpackNT): Is not Nonerminal"
+
+extractNts :: [RuleRight] -> [NonterminalSymbol]
+extractNts []       = []
+extractNts (x:xs)   = case x of 
+                        (SR (Terminal t))       -> extractNts xs
+                        (SR (Nonterminal nt))   -> nt : extractNts xs
+                        (CR symbols)            -> [ unpackNt s | s <- symbols, not (isGsTerminal s)] ++ extractNts xs
+
+isValidRightSide :: RuleRight -> [NonterminalSymbol] -> Bool
+isValidRightSide rightSide validNt =    let 
+                                            rightSideNts = extractNts [rightSide]
+                                            validRightSideNts = [nt | nt <- rightSideNts, elem nt validNt]
+                                        in (length rightSideNts) == (length validRightSideNts)
+
+genTerminal :: RuleRight -> [NonterminalSymbol] -> Bool
+genTerminal rr ntGenT = case rr of 
+    (SR (Terminal t)) -> True
+    (SR (Nonterminal nt)) -> elem nt ntGenT
+    (CR symbols) -> length [s | s <- symbols, ((isGsTerminal s) || elem (unpackNt s) ntGenT)] == length symbols
+
+reduceCFG :: ContextFreeGrammar -> ContextFreeGrammar
+reduceCFG (iNt, rules) =    let
+                                nTsGeneratingTerminals = getNtGenT rules
+                                aRules = [(nt,rr) | (nt,rr) <- rules, ((elem nt nTsGeneratingTerminals) && (isValidRightSide rr nTsGeneratingTerminals))]
+                                avaibleFromInitialNt = getNtAvaibleFromINt iNt aRules
+                                bRules = [(nt,rr) | (nt,rr) <- aRules, elem nt avaibleFromInitialNt]
+                                finalNt = nub [nt | (nt,_) <- bRules]
+                                finalRules = [(nt,rr) | (nt,rr) <-bRules, (isValidRightSide rr finalNt)]
+                            in if (elem iNt finalNt) then (iNt,finalRules) else error "CFG can't be reduced."
+
+
+getNtGenT :: [Rule] -> [NonterminalSymbol]
+getNtGenT rules =   let initialNts = (nub [ nt | (nt,rightSide) <- rules, isRRTerminal rightSide])
+                    in recGenNt initialNts where
+                        recGenNt :: [NonterminalSymbol] -> [NonterminalSymbol]
+                        recGenNt f =    let new = [ nt | (nt,rs) <- rules, (genTerminal rs f), not (elem nt f)]
+                                        in if (length new) == 0 then f else recGenNt (nub (f ++ new))
+
+
+gett :: ContextFreeGrammar -> [NonterminalSymbol]
+gett (is,rules) = getNtAvaibleFromINt is rules
+
+getNtAvaibleFromINt :: NonterminalSymbol -> [Rule] -> [NonterminalSymbol]
+getNtAvaibleFromINt iNt rules = let initialNts = nub (iNt : (extractNts [ rr | (nt, rr)<- rules, nt == iNt ]))
+                                in recGenNt initialNts where
+                                    recGenNt :: [NonterminalSymbol] -> [NonterminalSymbol]
+                                    recGenNt f =    let 
+                                                        possiblyNew = nub (concat [extractNts [rs] | (nt,rs) <- rules, (elem nt f)])
+                                                        reallyNew = possiblyNew Data.List.\\ f
+                                                    in if (length reallyNew) == 0 then f else recGenNt (f ++ reallyNew)

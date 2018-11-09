@@ -47,15 +47,23 @@
 		],
 		"description": "Insert Regular expression iteration"
 	},
-	"Method comment": {
+	"Insert CFG Terminal": {
 		"scope": "haskell",
-		"prefix": "cmnt",
+		"prefix": "term",
 		"body": [
-			"{- |",
-			"	$1",
-			"-}",
+			"(Terminal (CFGSymbol '$1'))"
 		],
-		"description": "Insert Regular expression iteration"
+		"description": "Insert Context-free grammar terminal"
+	},
+	"Insert CFG NonTerminal": {
+		"scope": "haskell",
+		"prefix": "nonterm",
+		"body": [
+			"(Nonterminal \"$1\")"
+		],
+		"description": "Insert Context-free grammar Nonterminal"
 	}
+	// (Nonterminal "B"),(Terminal (CFGSymbol 'b')),(Nonterminal "A")])),
+	
 	
 }
