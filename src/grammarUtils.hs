@@ -157,3 +157,20 @@ getNtAvaibleFromINt iNt rules = let initialNts = nub (iNt : (extractNts [ rr | (
                                                         possiblyNew = nub (concat [extractNts [rs] | (nt,rs) <- rules, (elem nt f)])
                                                         reallyNew = possiblyNew Data.List.\\ f
                                                     in if (length reallyNew) == 0 then f else recGenNt (f ++ reallyNew)
+
+isRegular :: ContextFreeGrammar -> Bool
+isRegular cfg = (isLeftRegular cfg) || (isRightRegular cfg)
+
+isLeftRegular :: ContextFreeGrammar -> Bool
+isLeftRegular (_,rules) = (length [1 | (_,rr) <- rules, isLeftRegularRule rr]) == (length rules)
+
+isRightRegular :: ContextFreeGrammar -> Bool
+isRightRegular (_,rules) = (length [1 | (_,rr) <- rules, isRightRegularRule rr]) == (length rules)
+
+isRightRegularRule :: RuleRight -> Bool
+isRightRegularRule (SR _) = True
+isRightRegularRule (CR rules) = ((length rules) == 2) && (isGsTerminal (rules !! 0)) && (not (isGsTerminal (rules !! 1)))
+
+isLeftRegularRule :: RuleRight -> Bool
+isLeftRegularRule (SR _) = True
+isLeftRegularRule (CR rules) = ((length rules) == 2) && (not (isGsTerminal (rules !! 0))) && (isGsTerminal (rules !! 1))

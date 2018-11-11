@@ -48,3 +48,40 @@ module CfgExamples where
         ("G", (CR [(Nonterminal "D"),(Nonterminal "A")]))
         ])
 
+    leftRegEx :: ContextFreeGrammar
+    leftRegEx = ("A", [
+        ("A", (SR (Terminal (CFGSymbol 'a')))),
+        ("A", (SR (Terminal CFGEpsilon))),
+        ("A", (SR (Nonterminal "B"))),
+        ("B", (CR [(Nonterminal "B"), (Terminal (CFGSymbol 'd'))]))
+        ])
+    notLeftRegEx :: ContextFreeGrammar
+    notLeftRegEx = ("A", [
+        ("A", (SR (Terminal (CFGSymbol 'a')))),
+        ("A", (SR (Terminal CFGEpsilon))),
+        ("A", (SR (Nonterminal "B"))),
+        ("B", (CR [(Terminal (CFGSymbol 'd')), (Nonterminal "B")]))
+        ])
+    rightRegEx :: ContextFreeGrammar
+    rightRegEx = ("A", [
+        ("A", (SR (Terminal (CFGSymbol 'a')))),
+        ("A", (SR (Terminal CFGEpsilon))),
+        ("A", (SR (Nonterminal "B"))),
+        ("B", (CR [(Terminal (CFGSymbol 'd')), (Nonterminal "B")]))
+        ])
+    notRightRegEx :: ContextFreeGrammar
+    notRightRegEx = ("A", [
+        ("A", (SR (Terminal (CFGSymbol 'a')))),
+        ("A", (SR (Terminal CFGEpsilon))),
+        ("A", (SR (Nonterminal "B"))),
+        ("B", (CR [(Nonterminal "B"), (Terminal (CFGSymbol 'd'))]))
+        ])
+    notRegEx :: ContextFreeGrammar
+    notRegEx = ("A", [
+        ("A", (SR (Terminal (CFGSymbol 'a')))),
+        ("A", (SR (Terminal CFGEpsilon))),
+        ("A", (SR (Nonterminal "B"))),
+        ("B", (CR [(Nonterminal "B"), (Terminal (CFGSymbol 'd'))])),
+        ("B", (SR (Nonterminal "C"))),
+        ("C", (CR [(Nonterminal "A"), (Nonterminal "B")]))
+        ])

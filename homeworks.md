@@ -53,8 +53,8 @@ Course project. Operations with context-free grammar.
 - [x] Regular expression to context-free grammar
 - [x] Automaton to context-free grammar
 - [x] Reduction of context-free grammar
+- [x] Check if grammar is left-regular or right-regular (*So check if grammar is regular*)
 - [ ] Removal of `epsilon rules`
 - [ ] Removal of `simple rules`
-- [ ] Check if grammar is left-regular or right-regular (*So check if grammar is regular*)
 - [ ] Context-free grammar to chomsky normal form
 - [ ] *Cocke-Younger-Kasami algorithm, (only if there is time)*
