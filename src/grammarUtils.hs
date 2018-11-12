@@ -24,6 +24,9 @@ mapWoLast f []      = []
 mapWoLast f [x]     = [x]
 mapWoLast f (x:xs)  = f x : mapWoLast f xs
 
+getAllNonterminals :: [Rule] -> [NonterminalSymbol]
+getAllNonterminals rules = nub [nt | (nt,_) <- rules]
+
 getNonterminals :: NonterminalSymbol -> [Rule] -> [NonterminalSymbol]
 getNonterminals initial other = initial : [ nT | (nT,_) <- (nubBy ruleFromSameNt other), not (nT == initial)]
 
@@ -96,6 +99,7 @@ eAutToCFG (_,is,fs,_,trans) =   let
 
 
 
+
 isGsTerminal :: GrammarSymbol -> Bool
 isGsTerminal (Terminal t)   = True
 isGsTerminal _              = False
@@ -103,6 +107,22 @@ isGsTerminal _              = False
 isRRTerminal :: RuleRight -> Bool
 isRRTerminal (SR gs)    = isGsTerminal gs
 isRRTerminal _          = False
+
+isRRSimpleNonterminal :: RuleRight -> Bool
+isRRSimpleNonterminal (SR gs)   = not (isGsTerminal gs)
+isRRSimpleNonterminal _         = False
+
+isRREpsilonTerm :: RuleRight -> Bool
+isRREpsilonTerm (SR gs) = case gs of 
+                            Terminal t  -> case t of 
+                                            CFGEpsilon  -> True
+                                            otherwise   -> False
+                            otherwise   -> False
+isRREpsilonTerm _       = False
+
+unpackNtFromRR :: RuleRight -> NonterminalSymbol
+unpackNtFromRR (SR gs)   = unpackNt gs
+unpackNtFromRR _         = error "(unpackNtFromRR): Is not RuleRight with `SR`"
 
 unpackNt :: GrammarSymbol -> NonterminalSymbol
 unpackNt (Nonterminal nt)   = nt
@@ -115,11 +135,9 @@ extractNts (x:xs)   = case x of
                         (SR (Nonterminal nt))   -> nt : extractNts xs
                         (CR symbols)            -> [ unpackNt s | s <- symbols, not (isGsTerminal s)] ++ extractNts xs
 
-isValidRightSide :: RuleRight -> [NonterminalSymbol] -> Bool
-isValidRightSide rightSide validNt =    let 
-                                            rightSideNts = extractNts [rightSide]
-                                            validRightSideNts = [nt | nt <- rightSideNts, elem nt validNt]
-                                        in (length rightSideNts) == (length validRightSideNts)
+derivTo :: RuleRight -> [NonterminalSymbol] -> Bool
+derivTo (SR gs) nts         = (not (isGsTerminal gs)) && (elem (unpackNt gs) nts)
+derivTo (CR symbols) nts    = (length [1 | gs <- symbols, (not (isGsTerminal gs)) && (elem (unpackNt gs) nts)]) == (length symbols)
 
 genTerminal :: RuleRight -> [NonterminalSymbol] -> Bool
 genTerminal rr ntGenT = case rr of 
@@ -135,7 +153,13 @@ reduceCFG (iNt, rules) =    let
                                 bRules = [(nt,rr) | (nt,rr) <- aRules, elem nt avaibleFromInitialNt]
                                 finalNt = nub [nt | (nt,_) <- bRules]
                                 finalRules = [(nt,rr) | (nt,rr) <-bRules, (isValidRightSide rr finalNt)]
-                            in if (elem iNt finalNt) then (iNt,finalRules) else error "CFG can't be reduced."
+                            in if (elem iNt finalNt) then (iNt,finalRules) else error "CFG can't be reduced." where
+                                isValidRightSide :: RuleRight -> [NonterminalSymbol] -> Bool
+                                isValidRightSide rightSide validNt =
+                                    let 
+                                        rightSideNts = extractNts [rightSide]
+                                        validRightSideNts = [nt | nt <- rightSideNts, elem nt validNt]
+                                    in (length rightSideNts) == (length validRightSideNts)
 
 
 getNtGenT :: [Rule] -> [NonterminalSymbol]
@@ -145,9 +169,6 @@ getNtGenT rules =   let initialNts = (nub [ nt | (nt,rightSide) <- rules, isRRTe
                         recGenNt f =    let new = [ nt | (nt,rs) <- rules, (genTerminal rs f), not (elem nt f)]
                                         in if (length new) == 0 then f else recGenNt (nub (f ++ new))
 
-
-gett :: ContextFreeGrammar -> [NonterminalSymbol]
-gett (is,rules) = getNtAvaibleFromINt is rules
 
 getNtAvaibleFromINt :: NonterminalSymbol -> [Rule] -> [NonterminalSymbol]
 getNtAvaibleFromINt iNt rules = let initialNts = nub (iNt : (extractNts [ rr | (nt, rr)<- rules, nt == iNt ]))
@@ -174,3 +195,33 @@ isRightRegularRule (CR rules) = ((length rules) == 2) && (isGsTerminal (rules !!
 isLeftRegularRule :: RuleRight -> Bool
 isLeftRegularRule (SR _) = True
 isLeftRegularRule (CR rules) = ((length rules) == 2) && (not (isGsTerminal (rules !! 0))) && (isGsTerminal (rules !! 1))
+
+
+{- |
+    - 1. Mnozina vsechn nt, ktere jdou prepsat nejakou derivaci na Epsilon
+        - Zacneme od nt, ktere se prepisuji na epsilon, a jdeme zpetne...
+    - 2. Odstranime vsechny pravidla prepisu na epsilon.
+    - 3. Upravime pravidla, takove, ktere obsahovali nejaky nt z mnoziny z prvniho kroku, a to tak, ze vynechame tyto
+-}
+removeEpsilonRules :: ContextFreeGrammar -> [NonterminalSymbol]
+removeEpsilonRules (is,rules) = findNonTermToEps rules
+
+findNonTermToEps :: [Rule] -> [NonterminalSymbol]
+findNonTermToEps rules =    let initialNts = [ nt | (nt,rr) <- rules, isRREpsilonTerm rr]
+                            in recFindNts initialNts where
+                            recFindNts :: [NonterminalSymbol] -> [NonterminalSymbol]
+                            recFindNts nts =    let newNts = nub ([nt | (nt,rr) <- rules, (not (elem nt nts) && (derivTo rr nts))])
+                                                in if (length newNts) == 0 then nts else recFindNts (nts ++ newNts)
+
+{- |
+-}
+removeSimpleRules :: ContextFreeGrammar -> [[NonterminalSymbol]]
+removeSimpleRules (is,rules) = findSimpleNtsForNt (getAllNonterminals rules) rules
+
+findSimpleNtsForNt :: [NonterminalSymbol] -> [Rule] -> [[NonterminalSymbol]]
+findSimpleNtsForNt nonTerminals rules = [(recFindNts [nt]) | nt <- nonTerminals] where
+    recFindNts :: [NonterminalSymbol] -> [NonterminalSymbol]
+    recFindNts nts =    let 
+                        newNts = nub ([(unpackNtFromRR rr) | (nt,rr) <- rules, ((elem nt nts) && (isRRSimpleNonterminal rr))])
+                        reallyNew = newNts Data.List.\\ nts
+                        in if length (reallyNew) == 0 then nts else recFindNts (nts ++ reallyNew)

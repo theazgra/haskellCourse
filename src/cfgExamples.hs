@@ -85,3 +85,39 @@ module CfgExamples where
         ("B", (SR (Nonterminal "C"))),
         ("C", (CR [(Nonterminal "A"), (Nonterminal "B")]))
         ])
+    remEpsEx :: ContextFreeGrammar
+    remEpsEx = ("S", [
+        ("S", (CR [(Nonterminal "A"),(Nonterminal "S"),(Nonterminal "A")])),
+        ("S", (CR [(Terminal (CFGSymbol 'a')),(Nonterminal "B"),(Nonterminal "C")])),
+        ("S", (SR (Terminal (CFGSymbol 'b')))),
+        ("A", (CR [(Nonterminal "B"),(Nonterminal "D")])),
+        ("A", (CR [(Terminal (CFGSymbol 'a')),(Nonterminal "A"),(Nonterminal "B")])),
+        ("B", (CR [(Terminal (CFGSymbol 'b')),(Nonterminal "B")])),
+        ("B", (SR (Terminal CFGEpsilon))),
+        ("C", (CR [(Nonterminal "A"),(Terminal (CFGSymbol 'a')),(Nonterminal "A")])),
+        ("C", (SR (Terminal (CFGSymbol 'b')))),
+        ("D", (CR [(Nonterminal "A"),(Nonterminal "D")])),
+        ("D", (CR [(Nonterminal "B"),(Nonterminal "B"),(Nonterminal "B")])),
+        ("D", (SR (Terminal (CFGSymbol 'a'))))
+        ])
+    remSimpleEx :: ContextFreeGrammar
+    remSimpleEx = ("S", [
+        ("S", (CR [(Nonterminal "A"),(Nonterminal "B")])),
+        ("S", (SR (Nonterminal "C"))),
+        ("A", (SR (Terminal (CFGSymbol 'a')))),
+        ("A", (CR [(Terminal (CFGSymbol 'b')),(Nonterminal "A")])),
+        ("B", (SR (Nonterminal "C") )),
+        ("B", (SR (Terminal (CFGSymbol 'b')))),
+        ("C", (SR (Nonterminal "D"))),
+        ("C", (CR [(Nonterminal "A"),(Nonterminal "A")])),
+        ("C", (CR [(Nonterminal "A"),(Terminal (CFGSymbol 'a')),(Nonterminal "A")])),
+        ("D", (SR (Nonterminal "B"))),
+        ("D", (CR [(Nonterminal "A"),(Nonterminal "B"),(Terminal (CFGSymbol 'b'))]))
+        ])
+
+
+        -- S → AB | C
+        -- A → a | bA
+        -- B → C | b
+        -- C → D | AA | AaA
+        -- D → B | ABb
