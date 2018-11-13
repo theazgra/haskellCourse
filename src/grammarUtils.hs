@@ -213,10 +213,17 @@ findNonTermToEps rules =    let initialNts = [ nt | (nt,rr) <- rules, isRREpsilo
                             recFindNts nts =    let newNts = nub ([nt | (nt,rr) <- rules, (not (elem nt nts) && (derivTo rr nts))])
                                                 in if (length newNts) == 0 then nts else recFindNts (nts ++ newNts)
 
-{- |
--}
-removeSimpleRules :: ContextFreeGrammar -> [[NonterminalSymbol]]
-removeSimpleRules (is,rules) = findSimpleNtsForNt (getAllNonterminals rules) rules
+removeSimpleRules :: ContextFreeGrammar -> ContextFreeGrammar
+removeSimpleRules (is,rules) = let 
+    nonTerminals    = getAllNonterminals rules
+    simpleNtsForNt  = findSimpleNtsForNt nonTerminals rules
+    newRules        = concat (createNewRules simpleNtsForNt)
+    in (is,newRules) where
+        createNewRules :: [[NonterminalSymbol]] -> [[Rule]]
+        createNewRules ntGroups = 
+            [
+                concat ([[((head group),rr) | (rNt,rr) <- rules, ((rNt == nt) && (not (isRRSimpleNonterminal rr)))] | nt <- group ])
+            |  group <- ntGroups]
 
 findSimpleNtsForNt :: [NonterminalSymbol] -> [Rule] -> [[NonterminalSymbol]]
 findSimpleNtsForNt nonTerminals rules = [(recFindNts [nt]) | nt <- nonTerminals] where
@@ -225,3 +232,5 @@ findSimpleNtsForNt nonTerminals rules = [(recFindNts [nt]) | nt <- nonTerminals]
                         newNts = nub ([(unpackNtFromRR rr) | (nt,rr) <- rules, ((elem nt nts) && (isRRSimpleNonterminal rr))])
                         reallyNew = newNts Data.List.\\ nts
                         in if length (reallyNew) == 0 then nts else recFindNts (nts ++ reallyNew)
+
+-- http://www.cs.vsb.cz/sawa/ti/slides/ti-slides-06.pdf --78
