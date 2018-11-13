@@ -19,13 +19,32 @@ regEx3 = Iter ( Conc (Or (RESymb (Symbol 'a')) (RESymb (Symbol 'b'))) (RESymb (S
 ruleFromSameNt :: Rule -> Rule -> Bool
 ruleFromSameNt (ntA,_) (ntB,_) = ntA == ntB
 
+countNt :: [GrammarSymbol] -> NonterminalSymbol -> Int
+countNt list e = length ([1 | x <- list, (not (isGsTerminal x) && ((unpackNt x) == e))])
+
 mapWoLast :: (a -> a) -> [a] -> [a]
 mapWoLast f []      = []
 mapWoLast f [x]     = [x]
 mapWoLast f (x:xs)  = f x : mapWoLast f xs
 
+subseq :: Eq a => [a] -> [a] -> Bool
+[]     `subseq` _      = True
+(_:_ ) `subseq` []     = False
+(a:as) `subseq` (b:bs) = (if a == b then as else a:as) `subseq` bs
+
+listPermutations :: [a] -> Int -> [[a]]
+listPermutations _ 0      = [[]]
+listPermutations [] _     = []
+listPermutations (x:xs) n = fmap (x:) (listPermutations xs (n - 1)) ++ listPermutations xs n
+
+toGs :: [NonterminalSymbol] -> [GrammarSymbol]
+toGs input = [Nonterminal x | x <- input]
+
 getAllNonterminals :: [Rule] -> [NonterminalSymbol]
 getAllNonterminals rules = nub [nt | (nt,_) <- rules]
+
+gsDel :: [GrammarSymbol] -> [NonterminalSymbol] -> [GrammarSymbol]
+gsDel input toDel = input Data.List.\\ ([Nonterminal x | x <- toDel])
 
 getNonterminals :: NonterminalSymbol -> [Rule] -> [NonterminalSymbol]
 getNonterminals initial other = initial : [ nT | (nT,_) <- (nubBy ruleFromSameNt other), not (nT == initial)]
@@ -126,7 +145,7 @@ unpackNtFromRR _         = error "(unpackNtFromRR): Is not RuleRight with `SR`"
 
 unpackNt :: GrammarSymbol -> NonterminalSymbol
 unpackNt (Nonterminal nt)   = nt
-unpackNt _                  = error "(unpackNT): Is not Nonerminal"
+unpackNt _                  = error "(unpackNt): Is not Nonerminal"
 
 extractNts :: [RuleRight] -> [NonterminalSymbol]
 extractNts []       = []
@@ -196,15 +215,30 @@ isLeftRegularRule :: RuleRight -> Bool
 isLeftRegularRule (SR _) = True
 isLeftRegularRule (CR rules) = ((length rules) == 2) && (not (isGsTerminal (rules !! 0))) && (isGsTerminal (rules !! 1))
 
+removeEpsilonRules :: ContextFreeGrammar -> ContextFreeGrammar
+removeEpsilonRules (is,rules) = let
+    nonTerminals    = getAllNonterminals rules
+    epsilonNts      = findNonTermToEps rules
+    newRules        = createNewRules nonTerminals epsilonNts
+    in (is,newRules) where
+        createNewRules :: [NonterminalSymbol] -> [NonterminalSymbol] -> [Rule]
+        createNewRules nts epsNts = concat [ 
+                concat [ ((rNt,rr) : (epsPerm (rNt,rr))) | (rNt,rr) <- rules, (rNt == nt), (not (isRREpsilonTerm rr))]
+            | nt <- nts] where
+                epsPerm :: Rule -> [Rule]
+                epsPerm (nt,rr) = case rr of
+                    (SR _)          -> []
+                    (CR symbols)    ->  let
+                                            epsCombs = [(concat (listPermutations epsNts i)) | i <- [1..((length epsNts)-1)]]
+                                            epsCombsSymbs = [(symbols `gsDel` comb) | comb <- epsCombs]
+                                            newSymbols = nub (concat [
+                                                concat [permutations (symbols `gsDel` (replicate i epsNt)) | i <- [1..(countNt symbols epsNt)]]
+                                                | epsNt <- epsNts])
 
-{- |
-    - 1. Mnozina vsechn nt, ktere jdou prepsat nejakou derivaci na Epsilon
-        - Zacneme od nt, ktere se prepisuji na epsilon, a jdeme zpetne...
-    - 2. Odstranime vsechny pravidla prepisu na epsilon.
-    - 3. Upravime pravidla, takove, ktere obsahovali nejaky nt z mnoziny z prvniho kroku, a to tak, ze vynechame tyto
--}
-removeEpsilonRules :: ContextFreeGrammar -> [NonterminalSymbol]
-removeEpsilonRules (is,rules) = findNonTermToEps rules
+                                            ruleRights = [ if (length gs) == 1 then (SR (head gs)) else (CR gs) 
+                                                | gs <- (nub (newSymbols ++ epsCombsSymbs)), ((length gs > 0) && (subseq gs symbols))]
+                                        in [ (nt,newRr) | newRr <- ruleRights]
+
 
 findNonTermToEps :: [Rule] -> [NonterminalSymbol]
 findNonTermToEps rules =    let initialNts = [ nt | (nt,rr) <- rules, isRREpsilonTerm rr]
