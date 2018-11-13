@@ -266,5 +266,3 @@ findSimpleNtsForNt nonTerminals rules = [(recFindNts [nt]) | nt <- nonTerminals]
                         newNts = nub ([(unpackNtFromRR rr) | (nt,rr) <- rules, ((elem nt nts) && (isRRSimpleNonterminal rr))])
                         reallyNew = newNts Data.List.\\ nts
                         in if length (reallyNew) == 0 then nts else recFindNts (nts ++ reallyNew)
-
--- http://www.cs.vsb.cz/sawa/ti/slides/ti-slides-06.pdf --78
