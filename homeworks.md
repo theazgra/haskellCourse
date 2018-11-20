@@ -56,3 +56,12 @@ Course project. Operations with context-free grammar.
 - [x] Check if grammar is left-regular or right-regular (*So check if grammar is regular*)
 - [x] Removal of `epsilon rules`
 - [x] Removal of `simple rules`
+
+
+## OpenMP matrices operations.
+- [ ] matrix multiplication using 3 `for` cycles.
+    - *1..N 1..N 1..K*
+    - Different representations of matrices (*1d,2d array, `std::vector`*)
+    - Mixing of internal cycles
+    - Find the fastest combination.
+- 
