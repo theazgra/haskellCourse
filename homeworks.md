@@ -58,10 +58,11 @@ Course project. Operations with context-free grammar.
 - [x] Removal of `simple rules`
 
 
-## OpenMP matrices operations.
-- [ ] matrix multiplication using 3 `for` cycles.
+## OpenMP matrices operations. 
+- [ ] matrix multiplication using 3 `for` cycles. *(15 pts)*
     - *1..N 1..N 1..K*
     - Different representations of matrices (*1d,2d array, `std::vector`*)
     - Mixing of internal cycles
     - Find the fastest combination.
+    - Result is *document*
 - 
