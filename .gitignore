@@ -22,4 +22,10 @@ cabal.project.local~
 .HTF/
 .ghc.environment.*
 tiny/
-
+.vs/
+Debug/
+Release/
+obj/
+Obj/
+x64/
+x86/
