@@ -1,6 +1,4 @@
 #include "pch.h"
-//#include "Stopwatch.h"
-
 
 Stopwatch::Stopwatch()
 {

@@ -160,6 +160,7 @@
     <ClInclude Include="Array2DMatrix.h" />
     <ClInclude Include="ArrayMatrix.h" />
     <ClInclude Include="BasicMatrix.h" />
+    <ClInclude Include="MatrixMultiplicator.h" />
     <ClInclude Include="MatrixUtils.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Stopwatch.h" />
