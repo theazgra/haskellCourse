@@ -375,18 +375,20 @@ void openmp_mul_benchmark(const BasicMatrix<int> &A, const BasicMatrix<int> &B, 
 
 int main(int, char **)
 {
+    //ArrayMatrix<int> test = get_fixed_test_array_matrix(100);
+    // print_matrix(test, "%i\t");
+    // return 0;
     //approx_pi();
     //return test_mul_if_correct() ? 0 : 1;
-    const long matrixSize = 200;
+    const long matrixSize = 1000;
     const int sampleCount = 10;
 
-    ArrayMatrix<int> arrA = ArrayMatrix<int>(matrixSize, matrixSize);
-    ArrayMatrix<int> arrB = ArrayMatrix<int>(matrixSize, matrixSize);
-
-    fill_matrix_with_random_int_values(arrA);
+    ArrayMatrix<int> arrA = get_fixed_test_array_matrix(matrixSize);
     printf("Filled matrix A.\n");
-    fill_matrix_with_random_int_values(arrB);
+
+    ArrayMatrix<int> arrB = get_fixed_test_array_matrix(matrixSize);
     printf("Filled matrix B.\n");
+
 
     printf("BENCHMARK for Array Matrices, dimensions %i x %i\n", (int)matrixSize, (int)matrixSize);
     printf("Starting single-threaded, no open-mp multiplication.\n");

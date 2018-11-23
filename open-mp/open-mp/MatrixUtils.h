@@ -58,6 +58,20 @@ bool is_correct_result(const BasicMatrix<int> &actual, const BasicMatrix<int> &e
 	return true;
 }
 
+ArrayMatrix<int> get_fixed_test_array_matrix(long dimension)
+{
+	ArrayMatrix<int> result = ArrayMatrix<int>(dimension, dimension);
+	
+	
+	for(long row = 0; row < result.rows(); row++)
+	{
+		for(long col = 0; col < result.cols(); col++)
+		{
+			result(row, col) = (int)row + (int)col;
+		}
+	}
+	return result;
+}
 
 ArrayMatrix<int> get_test_array_matrix(long dimension)
 {
