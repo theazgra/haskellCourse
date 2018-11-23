@@ -5,7 +5,8 @@ include(CTest)
 enable_testing()
 
 set(SOURCE_FILES    open-mp/pch.h open-mp/BasicMatrix.h open-mp/ArrayMatrix.h open-mp/Array2DMatrix.h open-mp/VectorMatrix.h open-mp/Vector2DMatrix.h 
-                    open-mp/MatrixUtils.h open-mp/MatrixUtils.cpp open-mp/Stopwatch.h open-mp/Stopwatch.cpp open-mp/MatrixMultiplicator.h) 
+                    open-mp/MatrixUtils.h open-mp/Stopwatch.h open-mp/MatrixMultiplicator.h
+                    ) 
 
 add_executable(open-mp open-mp/main.cpp)
 
