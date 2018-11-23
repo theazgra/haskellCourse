@@ -1,0 +1,13 @@
+BENCHMARK for Array Matrices, dimensions 1000 x 1000
+Starting single-threaded, no open-mp multiplication.
+===========================================SINGLE-THREAD==================================
+[basic_multiplication_1], average time for 10 samples: 3396.600000 ms.
+[basic_mult_1_with_tmp],  average time for 10 samples: 3514.300000 ms.
+[basic_multiplication_2], average time for 10 samples: 2993.300000 ms.
+[basic_multiplication_3], average time for 10 samples: 3161.100000 ms.
+[basic_mult_3_with_tmp],  average time for 10 samples: 3302.500000 ms.
+[basic_multiplication_4], average time for 10 samples: 6923.100000 ms.
+[basic_multiplication_5], average time for 10 samples: 3000.200000 ms.
+[basic_multiplication_6], average time for 10 samples: 6762.400000 ms.
+==========================================================================================
+
