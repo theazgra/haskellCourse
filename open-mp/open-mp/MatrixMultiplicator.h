@@ -219,7 +219,7 @@ void openmp_multiplication_1_1(const BasicMatrix<T>& A, const BasicMatrix<T>& B,
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 
 	s.start();
@@ -247,7 +247,7 @@ void openmp_multiplication_1_2(const BasicMatrix<T>& A, const BasicMatrix<T>& B,
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 
 	s.start();
@@ -275,7 +275,7 @@ void openmp_multiplication_1_3(const BasicMatrix<T>& A, const BasicMatrix<T>& B,
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 
 	s.start();
@@ -303,7 +303,7 @@ void openmp_multiplication_1_with_tmp(const BasicMatrix<T>& A, const BasicMatrix
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 
 	int tmp = 0;
@@ -333,7 +333,7 @@ void openmp_multiplication_1_atomic(const BasicMatrix<T>& A, const BasicMatrix<T
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 
 	s.start();
@@ -362,7 +362,7 @@ void openmp_multiplication_2(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 
 	s.start();
@@ -390,7 +390,7 @@ void openmp_multiplication_2_atomic(const BasicMatrix<T>& A, const BasicMatrix<T
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 
 	s.start();
@@ -420,7 +420,7 @@ void openmp_multiplication_3(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 	s.start();
 
@@ -447,7 +447,7 @@ void openmp_multiplication_4(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 	s.start();
 
@@ -473,7 +473,7 @@ void openmp_multiplication_5(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
 	Stopwatch s;
 
 	s.start();
@@ -500,7 +500,8 @@ void openmp_multiplication_6(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::exception("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+
 	Stopwatch s;
 
 	s.start();

@@ -13,6 +13,7 @@ void fill_matrix_with_random_double_values(BasicMatrix<double>& matrix, const do
 template<typename T>
 void fill_matrix_with_value(BasicMatrix<T>& matrix, const T value)
 {
+#pragma omp parallel for
 	for (long row = 0; row < matrix.rows(); row++)
 	{
 		for (long col = 0; col < matrix.cols(); col++)
@@ -34,5 +35,17 @@ void print_matrix(const BasicMatrix<T>& matrix, const std::string format)
 		}
 		printf("]");
 		printf("\n");
+	}
+}
+
+template <typename T>
+void copy_matrix(const BasicMatrix<T>& source, BasicMatrix<T>& dest)
+{
+	for (long row = 0; row < source.rows(); row++)
+	{
+		for (long col = 0; col < source.cols(); col++)
+		{
+			dest(row, col) = source(row, col);
+		}
 	}
 }

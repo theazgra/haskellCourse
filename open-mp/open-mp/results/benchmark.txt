@@ -1,0 +1,18 @@
+VectorMatrix
+
+[basic_multiplication_1], average time for 10 samples: 5447.000000 ms.
+[basic_mult_1_with_tmp],  average time for 10 samples: 3681.800000 ms.
+[basic_multiplication_2], average time for 10 samples: 4858.400000 ms.
+[basic_multiplication_3], average time for 10 samples: 4756.200000 ms.
+[basic_mult_3_with_tmp],  average time for 10 samples: 3222.800000 ms.
+[basic_multiplication_4], average time for 10 samples: 8593.500000 ms.
+[basic_multiplication_5], average time for 10 samples: 4609.400000 ms.
+[basic_multiplication_6], average time for 10 samples: 7850.200000 ms.
+
+[openmp_multiplication_1], average time for 10 samples: 1288.400000 ms.
+[openmp_multiplica_1_tmp], average time for 10 samples: 935.200000 ms.
+[openmp_multiplication_2], average time for 10 samples: 1014.900000 ms.
+[openmp_multiplication_3], average time for 10 samples: 1259.400000 ms.
+[openmp_multiplication_4], average time for 10 samples: 1926.000000 ms.
+[openmp_multiplication_5], average time for 10 samples: 1571.800000 ms.
+[openmp_multiplication_6], average time for 10 samples: 3302.400000 ms.
