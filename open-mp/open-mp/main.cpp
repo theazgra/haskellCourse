@@ -381,7 +381,7 @@ int main(int, char **)
     //approx_pi();
     //return test_mul_if_correct() ? 0 : 1;
     const long matrixSize = 1000;
-    const int sampleCount = 10;
+    const int sampleCount = 5;
 
     ArrayMatrix<int> arrA = get_fixed_test_array_matrix(matrixSize);
     printf("Filled matrix A.\n");
