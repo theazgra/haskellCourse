@@ -32,3 +32,10 @@ x86/
 [Bb]uild/
 build/
 Build/
+*.idx
+*.aux
+*.toc
+*.log
+*.out
+*.dvi
+*.synctex*

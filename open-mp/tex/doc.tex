@@ -1,0 +1,231 @@
+\documentclass[a4paper, 12pt]{article}
+
+\usepackage{tikz}		
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage[czech]{babel}
+
+\lstset{
+	language=C++,
+    basicstyle=\ttfamily\color{black},
+    keywordstyle=\color{blue}\ttfamily,
+    stringstyle=\color{red}\ttfamily,
+    commentstyle=\color{magenta}\ttfamily,
+    identifierstyle=\ttfamily\color{black}
+}
+
+\pgfplotsset{
+	compat=1.5, 
+	width=7cm,
+	/pgfplots/ybar legend/.style={
+    /pgfplots/legend image code/.code={%
+       \draw[##1,/tikz/.cd,yshift=-0.25em]
+        (0cm,0cm) rectangle (3pt,0.8em);},
+   }
+}
+\usetikzlibrary{patterns}
+
+\title{Porovnání rychlostí násobení matic pomocí OpenMP}
+\author{Moravec Vojtěch}
+\date{Zimní semestr 2018}
+
+
+\begin{document}
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Typy matic}
+Součástí zkoumání, bylo porovnání různých typů matic. Jako různé typy rozumíme matice s odlišným způsobem uložení dat. Zvolili jsme 4 typy uložení, do jednorozměrného pole, dvourozměrného pole a obdobně jsme použili \emph{std::vector}.
+
+
+Pro následné zjednodušení jsme vytvořili třídu nadřazenou všem těmto typům. Tato třídy definuje jednotný způsob přístupu k prvkům matice a to před operátor ().
+
+\lstinputlisting{code/BasicMatrix.h}
+
+Příklad přetížení těchto operátoru si můžeme ukázat například na matici, která je uložena v jednorozměrném poli.
+
+\lstinputlisting{code/ArrMat.h}
+
+\newpage
+\section{Způsoby násobení matic}
+V tomto dokumentu zkoumáme rychlost násobení matic pomocí 3 vnořených \emph{for} cyklů. Tyto cykly se dají přehazovat, takže dostáváme 6 různých způsobu násobení. Těchto 6 různých způsobu budeme zkoumat jak sériově tak paralelně.
+
+\lstinputlisting{code/forex.cpp}
+
+Pokud si označíme první cyklus $f_1$, druhý cyklus $f_2$ a poslední $f_3$, dostáváme těchto 6 "typů"   násobení:
+\begin{enumerate}
+\item $m_1 = f_1$ $f_2$ $f_3$
+\item $m_2 = f_1$ $f_3$ $f_2$
+\item $m_3 = f_2$ $f_1$ $f_3$
+\item $m_4 = f_2$ $f_3$ $f_1$
+\item $m_5 = f_3$ $f_1$ $f_2$
+\item $m_6 = f_3$ $f_2$ $f_1$
+\end{enumerate}
+
+\newpage
+
+Pro vylepšení paralelizace násobení se hodí používat další způsob, a to takový, že výsledek uložíme do výsledné matice až po provedení posledního cyklu. Toto se dá využít u cyklu $m_1$ a $m_3$ typu, a nové typy označíme jako 
+$m_{1\_tmp}$ a $m_{3\_tmp}$. Tyto cykly poté vypadají následně:
+
+\lstinputlisting{code/forex2.cpp}
+
+Pro využití paralelismu použijeme direktivy kompilátoru z OpenMP, přesněji \emph{\#pragma omp parallel for}. Tuto direktivu budeme používat před prvním \emph{for} cyklem. Pro násobení typu $m_1$ také vyzkoušíme přesunout tuto direktivu před druhý cyklus.
+
+\newpage
+\section{Způsob měření}
+
+Měření probíhalo na maticích $ 1000 \times 1000 $. Všechna měření se prováděla 5-krát a výsledný čas je tedy průměrem 5-ti časů. Čas jsme měřili pomocí \emph{std::chrono::high\_resolution\_clock}. 
+
+Matice byly naplněny následující způsobem:
+\begin{equation}
+ A[x,y] = x + y
+\end{equation}
+
+\noindent kde $A$ je matice, $x$ je řádek, $y$ sloupec a $A[x,y]$ určuje hodnotu matice $A$ na $x$-tem řádku a $y$-novém sloupci.
+
+OpenMP jsme testovali na 1-12 threadech. 12 jsme zvolili jako maximum, neboť počítač, na kterém běžely testy má 6-ti jádrový procesor s celkem 12 thready (Intel Core i7-8750H).
+
+\section{Výsledky měření}
+\textit{Všechny časy v této sekci jsou udávány v milisekundách.}
+\subsubsection{Násobení bez OpenMP}
+
+Na Obrázku \ref{fig:serial_plot} můžeme vidět porovnání času výpočtu, vzhledem k metodě uložení matice a ke zvolenému typu násobení. Z tohoto Obrázku vyčteme, že uložení do dvoudimenzionálního vektoru je zřejmě nejpomalejší. Nejrychleji se pak jeví uložení v typickém poli. Obecně typ matice nehraje tak velkou roli jako zvolený typ násobení. Očividně  pořadí \emph{for} cyklů v $m_4$ a $m_6$ dává nejmenší smysl, zatímco ostatní jsou si téměř rovny.
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}
+		\pgfkeys{/pgf/number format/.cd,1000 sep={\,}}
+		\begin{axis}[ xbar, xmin=0, height=18cm, width=13cm,
+					enlarge x limits=0.03,
+					xlabel={milisekundy},
+					symbolic y coords={$m_1$,$m_{1\_tmp}$,$m_2$,$m_3$,$m_{3\_tmp}$,
+									$m_4$,$m_5$,$m_6$},
+					legend style={at={(0.5,-0.1)},anchor=north},
+					ytick=data,
+					max space between ticks=50pt,
+					]
+			\addplot 	[draw=black,pattern=horizontal lines, color=blue]
+						coordinates {
+							(3225.6,$m_1$) (3347.6,$m_{1\_tmp}$) (2999.2,$m_2$)
+							(3059.6,$m_3$) (3222.4,$m_{3\_tmp}$) (6787.2,$m_4$)
+							(2978.4,$m_5$) (6731.2,$m_6$)
+							};
+% ARRAY 2D MATRIX
+			\addplot 	[draw=black,pattern=horizontal lines, color=red]
+						coordinates {
+							(3533,$m_1$) (3368,$m_{1\_tmp}$) (3582.6,$m_2$)
+							(3342.8,$m_3$) (3119.4,$m_{3\_tmp}$) (6898.4,$m_4$)
+							(2546.2,$m_5$) (6791.2,$m_6$)
+							};
+% VECTOR MATRIX
+			\addplot 	[draw=black,pattern=horizontal lines, color=cyan]
+						coordinates {
+							(3289.20,$m_1$) (3432.00,$m_{1\_tmp}$) (2996.20,$m_2$)
+							(3087.00,$m_3$) (3249.60,$m_{3\_tmp}$) (6869.60,$m_4$)
+							(2991.60,$m_5$) (6745.40,$m_6$)
+							};
+% VECTOR 2D MATRIX
+			\addplot 	[draw=black,pattern=horizontal lines, color=brown]
+						coordinates {
+							(3821.40,$m_1$) (3648.40,$m_{1\_tmp}$) (2979.00,$m_2$)
+							(3673.20,$m_3$) (3483.20,$m_{3\_tmp}$) (6962.80,$m_4$)
+							(2983.00,$m_5$) (6924.00,$m_6$)
+							};
+									
+			\legend{ArrayMatrix,Array2DMatrix,VectorMatrix,Vector2DMatrix}
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Rychlost násobení vzhledem k typu matice}
+	\label{fig:serial_plot}
+\end{figure}
+		
+\subsubsection{Násobení s OpenMP}
+Pro ukázku jsme vybrali násobení $m_1$, $m_{1\_tmp}$ , $m'_1$ a $m_2$. Všechny násobení v grafu \ref{fig:m1m1tmp_par} byly prováděny na matici, typu jednodimenzionálního pole. 
+$m'_1$ je násobení, kde jsme přesunuli \emph{\#pragma omp parallel for} před druhý cyklus. 
+Tato změna nevedla k lepšímu výsledku. Obecně si všimneme, že násobení matic pomocí OpenMP škáluje velmi dobře do 6-tého vlákna, dále se sice čas stále zmenšuje, ale již ne tak razantně. Jak jsme již uvedli uvedli, mezivýsledek pro násobení $m_{1\_tmp}$ opravdu zlepšuje rychlost, neboť třetí cyklus může být lépe zparalelizován. Nejsou zde uvedeny všechny typy násobení, ale jako nejlepší vyšlo násobení $m_2$, které dokázalo vynásobit matici $1000 \times 1000$ za $670,4$ milisekundy.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+	\pgfkeys{/pgf/number format/.cd,1000 sep={\,}}
+	\begin{axis}[ 	xlabel={Počet vláken},
+					ylabel={Milisekundy},
+					width=12cm,
+					height=12cm,
+					]
+%M 1 1
+		\addplot coordinates{	(1,5052.20) (2,2489.80) (3,1687.20) (4,1297.80)
+								(5,1188.40) (6,1024.80) (7,1113.00) (8,1045.00) 
+								(9,1005.80) (10,991.80) (11,1034.00) (12,961.60)
+								};
+%M 1 1 TMP		
+		\addplot coordinates{	(1,3228.00) (2,1624.20) (3,1102.60) (4,879.40)
+								(5,780.80) (6,676.40) (7,830.00) (8,755.60) 
+								(9,756.20) (10,735.80) (11,734.20) (12,721.40)
+								};
+%M 1 2
+		\addplot coordinates{	(1,4722.60) (2,2378.00) (3,1610.60) (4,1276.00)
+								(5,1135.2) (6,980.6) (7,1532.6) (8,1441.2) 
+								(9,1295.20) (10,1210.80) (11,1185.8) (12,1053.00)
+								};
+%M 2
+		\addplot coordinates{	(1,4223.60) (2,2125.6) (3,1437.4) (4,1138.8)
+								(5,996.60) (6,877.60) (7,945.00) (8,868.80) 
+								(9,811.80) (10,771.2) (11,740.60) (12,670.40)
+								};
+
+		\legend{$m_1$, $m_{1\_tmp}$, $m'_1$, $m_2$}
+	\end{axis}
+\end{tikzpicture}
+\caption{Škálování rychlosti násobení $m_1$, $m_{1\_tmp}$ s počtem threadů}
+\label{fig:m1m1tmp_par}
+\end{figure}
+
+
+\section{Závěr}
+Pro násobení různě uložených matic, jsme zjistili, že jejich uložení nehraje takovou roli tak jako pořadí tří \emph{for} cyklů, které provádějí vlastní násobení. Dále jsme zjistili, že pomocí OpenMP, umíme tuto operaci velmi dobře zparalelizovat a nejrychlejší čas jsme dostali pro násobení $m_2$ s 12-ti vlákny.
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
