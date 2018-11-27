@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/include/linux",
+                "/usr/include/openmpi",
                 "/usr/include/c++/7/tr1",
                 "/usr/lib/gcc",
                 "/usr/lib/gcc/x86_64-linux-gnu/7/include",
@@ -17,7 +18,8 @@
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "/usr/bin/g++",
-                "${workspaceRoot}"
+                "${workspaceRoot}",
+                "/usr/lib/x86_64-linux-gnu/openmpi/include"
             ],
             "defines": [
                 "_DEBUG",

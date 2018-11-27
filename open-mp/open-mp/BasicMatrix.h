@@ -1,13 +1,14 @@
 #pragma once
 #include "pch.h"
 
-template<typename T>
+template <typename T>
 class BasicMatrix
 {
-protected:
+  protected:
 	long rowCount;
 	long colCount;
-public:
+
+  public:
 	BasicMatrix(long rows, long cols)
 	{
 		this->rowCount = rows;
@@ -15,7 +16,8 @@ public:
 	}
 
 	virtual ~BasicMatrix()
-	{}
+	{
+	}
 
 	long cols() const
 	{
@@ -27,6 +29,6 @@ public:
 		return this->rowCount;
 	}
 
-	virtual T& operator()(long row, long col) = 0;
-	virtual const T& operator()(long row, long col) const = 0;
+	virtual T &operator()(long row, long col) = 0;
+	virtual const T &operator()(long row, long col) const = 0;
 };

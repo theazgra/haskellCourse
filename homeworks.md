@@ -59,10 +59,14 @@ Course project. Operations with context-free grammar.
 
 
 ## OpenMP matrices operations. 
-- [ ] matrix multiplication using 3 `for` cycles. *(15 pts)*
+- [x] matrix multiplication using 3 `for` cycles. *(15 pts)*
     - *1..N 1..N 1..K*
     - Different representations of matrices (*1d,2d array, `std::vector`*)
     - Mixing of internal cycles
     - Find the fastest combination.
     - Result is *document*
-- 
+
+## OpenMPI matrix multiplication
+- [ ] foster matrix multiplication task mesh
+    - https://www.mcs.anl.gov/~itf/dbpp/text/node45.html
+    - # of processes 4,9,16,26 
