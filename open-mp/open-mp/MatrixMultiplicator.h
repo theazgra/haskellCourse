@@ -2,13 +2,12 @@
 
 //1 2 3 for result.rows { for result.cols { for A.cols } }, calculate point by point in the result matrix.
 template <typename T>
-void basic_multiplication_1(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds)
+void basic_multiplication_1(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
 	StopwatchData s;
-
 
 	start_stopwatch(s);
 	for (long resRow = 0; resRow < result.rows(); resRow++)
@@ -27,13 +26,12 @@ void basic_multiplication_1(const BasicMatrix<T>& A, const BasicMatrix<T>& B, Ba
 
 //1 2 3 for result.rows { for result.cols { for A.cols } }, calculate point by point in the result matrix.
 template <typename T>
-void basic_multiplication_1_with_tmp(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds)
+void basic_multiplication_1_with_tmp(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
 	StopwatchData s;
-
 
 	int tmp;
 	start_stopwatch(s);
@@ -55,13 +53,12 @@ void basic_multiplication_1_with_tmp(const BasicMatrix<T>& A, const BasicMatrix<
 
 //1 3 2 for result.rows { for A.cols { for result.cols } }, calculate 'whole row by increment'
 template <typename T>
-void basic_multiplication_2(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds)
+void basic_multiplication_2(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
 	StopwatchData s;
-
 
 	start_stopwatch(s);
 
@@ -81,13 +78,12 @@ void basic_multiplication_2(const BasicMatrix<T>& A, const BasicMatrix<T>& B, Ba
 
 //2 1 3 for res.cols { for result.rows { for A.cols } }
 template <typename T>
-void basic_multiplication_3(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds)
+void basic_multiplication_3(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
 	StopwatchData s;
-
 
 	start_stopwatch(s);
 
@@ -105,10 +101,9 @@ void basic_multiplication_3(const BasicMatrix<T>& A, const BasicMatrix<T>& B, Ba
 	elapsedMilliseconds = elapsed_milliseconds(s);
 }
 
-
 //2 1 3 for res.cols { for result.rows { for A.cols } }
 template <typename T>
-void basic_multiplication_3_with_tmp(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds)
+void basic_multiplication_3_with_tmp(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
@@ -136,13 +131,12 @@ void basic_multiplication_3_with_tmp(const BasicMatrix<T>& A, const BasicMatrix<
 
 //2 3 1 for res.cols { for A.cols { for result.rows } }
 template <typename T>
-void basic_multiplication_4(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds)
+void basic_multiplication_4(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
 	StopwatchData s;
-
 
 	start_stopwatch(s);
 
@@ -162,13 +156,12 @@ void basic_multiplication_4(const BasicMatrix<T>& A, const BasicMatrix<T>& B, Ba
 
 //3 1 2 for A.cols { for A.rows { for result.cols } }
 template <typename T>
-void basic_multiplication_5(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds)
+void basic_multiplication_5(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
 	StopwatchData s;
-
 
 	start_stopwatch(s);
 
@@ -188,13 +181,12 @@ void basic_multiplication_5(const BasicMatrix<T>& A, const BasicMatrix<T>& B, Ba
 
 //3 2 1 for A.cols { for res.cols { for result.rows } }
 template <typename T>
-void basic_multiplication_6(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds)
+void basic_multiplication_6(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
 	StopwatchData s;
-
 
 	start_stopwatch(s);
 
@@ -214,12 +206,13 @@ void basic_multiplication_6(const BasicMatrix<T>& A, const BasicMatrix<T>& B, Ba
 
 //1 2 3 for result.rows { for result.cols { for A.cols } }, calculate point by point in the result matrix.
 template <typename T>
-void openmp_multiplication_1_1(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_1_1(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 
 	start_stopwatch(s);
@@ -242,12 +235,13 @@ void openmp_multiplication_1_1(const BasicMatrix<T>& A, const BasicMatrix<T>& B,
 
 //1 2 3 for result.rows { for result.cols { for A.cols } }, calculate point by point in the result matrix.
 template <typename T>
-void openmp_multiplication_1_2(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_1_2(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 
 	start_stopwatch(s);
@@ -270,12 +264,13 @@ void openmp_multiplication_1_2(const BasicMatrix<T>& A, const BasicMatrix<T>& B,
 
 //1 2 3 for result.rows { for result.cols { for A.cols } }, calculate point by point in the result matrix.
 template <typename T>
-void openmp_multiplication_1_3(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_1_3(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 
 	start_stopwatch(s);
@@ -298,12 +293,13 @@ void openmp_multiplication_1_3(const BasicMatrix<T>& A, const BasicMatrix<T>& B,
 }
 
 template <typename T>
-void openmp_multiplication_1_with_tmp(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_1_with_tmp(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 
 	int tmp = 0;
@@ -328,12 +324,13 @@ void openmp_multiplication_1_with_tmp(const BasicMatrix<T>& A, const BasicMatrix
 
 //1 2 3 for result.rows { for result.cols { for A.cols } }, calculate point by point in the result matrix.
 template <typename T>
-void openmp_multiplication_1_atomic(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_1_atomic(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 
 	start_stopwatch(s);
@@ -357,12 +354,13 @@ void openmp_multiplication_1_atomic(const BasicMatrix<T>& A, const BasicMatrix<T
 
 //1 3 2  for result.rows { for result.cols { for A.cols } }, calculate point by point in the result matrix.
 template <typename T>
-void openmp_multiplication_2(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_2(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 
 	start_stopwatch(s);
@@ -385,12 +383,13 @@ void openmp_multiplication_2(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 
 //1 2 3 for result.rows { for result.cols { for A.cols } }, calculate point by point in the result matrix.
 template <typename T>
-void openmp_multiplication_2_atomic(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_2_atomic(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 
 	start_stopwatch(s);
@@ -412,15 +411,15 @@ void openmp_multiplication_2_atomic(const BasicMatrix<T>& A, const BasicMatrix<T
 	elapsedMilliseconds = elapsed_milliseconds(s);
 }
 
-
 //2 1 3 for res.cols { for result.rows { for A.cols } }
 template <typename T>
-void openmp_multiplication_3(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_3(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 	start_stopwatch(s);
 
@@ -439,15 +438,15 @@ void openmp_multiplication_3(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 	elapsedMilliseconds = elapsed_milliseconds(s);
 }
 
-
 //2 3 1 for res.cols { for A.cols { for result.rows } }
 template <typename T>
-void openmp_multiplication_4(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_4(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 	start_stopwatch(s);
 
@@ -468,13 +467,13 @@ void openmp_multiplication_4(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 
 //3 1 2 for A.cols { for A.rows { for result.cols } }
 template <typename T>
-void openmp_multiplication_5(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_5(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 	StopwatchData s;
 	start_stopwatch(s);
 #pragma omp parallel for
@@ -490,18 +489,19 @@ void openmp_multiplication_5(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 		}
 	}
 	stop_stopwatch(s);
-	
+
 	elapsedMilliseconds = elapsed_milliseconds(s);
 }
 
 //3 2 1 for A.cols { for res.cols { for result.rows } }
 template <typename T>
-void openmp_multiplication_6(const BasicMatrix<T>& A, const BasicMatrix<T>& B, BasicMatrix<T>& result, double& elapsedMilliseconds, const unsigned short numberOfThreads)
+void openmp_multiplication_6(const BasicMatrix<T> &A, const BasicMatrix<T> &B, BasicMatrix<T> &result, double &elapsedMilliseconds, const unsigned short numberOfThreads)
 {
 	if (!(result.rows() == A.rows() && result.cols() == B.cols()))
 		throw new std::invalid_argument("Result matrix has wrong dimensions.");
 
-	omp_set_num_threads(numberOfThreads); assert(numberOfThreads == omp_get_num_threads());
+	omp_set_num_threads(numberOfThreads);
+	assert(numberOfThreads == omp_get_num_threads());
 
 	StopwatchData s;
 
@@ -519,6 +519,6 @@ void openmp_multiplication_6(const BasicMatrix<T>& A, const BasicMatrix<T>& B, B
 		}
 	}
 	stop_stopwatch(s);
-	
+
 	elapsedMilliseconds = elapsed_milliseconds(s);
 }
