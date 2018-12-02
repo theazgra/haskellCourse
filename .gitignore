@@ -39,3 +39,4 @@ Build/
 *.out
 *.dvi
 *.synctex*
+mpi/mpi_example.cpp
