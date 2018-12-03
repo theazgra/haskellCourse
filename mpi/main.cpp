@@ -22,9 +22,13 @@ void print_coords(const int *arr, const int threadId)
     printf("Thread %i:\tPREV[%i;%i]\n", threadId, arr[2], arr[3]);
 }
 
-inline uint get_index(const uint &row, const uint &col)
+uint get_index(const uint row, const uint col, bool print = false)
 {
-    return ((row * MatrixDim) + col);
+    uint result = ((row * MatrixDim) + col);
+
+    if (print)
+        printf("Row: %i;Col %i;Index=%i\n", row, col, result);
+    return result;
 }
 
 template <typename T>
@@ -71,7 +75,8 @@ int main(int argc, char **argv)
         printf("We require 17 threads for testing!\n");
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
-
+    const bool print = true;
+    const int printThread = 5;
     if (currentThreadId == MasterThreadId)
     {
         // Initialization and work distribution in master thread.
@@ -108,6 +113,7 @@ int main(int argc, char **argv)
         int taskRow = 0;
         int tmp;
         int aindex, bindex;
+
         // Initialize workers.
         for (int threadId = 1; threadId <= MatrixSize; threadId++)
         {
@@ -134,12 +140,15 @@ int main(int argc, char **argv)
             tmp = bReceiver + 2;
             coords[5] = tmp > currentMaxB ? tmp - MatrixDim : tmp;
 
-            //printf("Thread %i\tA[%i;%i]\tB[%i;%i]\n", threadId, aRow, aCol, bRow, bCol);
-            //printf("%i to %i,%i,%i and %i,%i,%i\n", threadId, coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+            aindex = get_index(bCol, bRow, (print && threadId == printThread));
+            bindex = get_index(aCol, aRow, (print && threadId == printThread));
 
-            aindex = get_index(aRow, aCol);
-            bindex = get_index(bRow, bCol);
-            printf("T%i: A[r:%i;c:%i],B[r:%i;c:%i],A index:%i,B index:%i\n", threadId, aRow, aCol, bRow, bCol, aindex, bindex);
+            if (print && threadId == printThread)
+            {
+                printf("%i to %i,%i,%i and %i,%i,%i\n", threadId, coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+                printf("T%i: A[r:%i;c:%i],B[r:%i;c:%i],A index:%i,B index:%i\n", threadId, bCol, bRow, aCol, aRow, aindex, bindex);
+            }
+
             MPI_Send(&A[aindex], 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
             MPI_Send(&B[bindex], 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
             MPI_Send(&coords[0], coordsSize, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
@@ -174,8 +183,7 @@ int main(int argc, char **argv)
 
     if (currentThreadId != MasterThreadId)
     {
-        const bool print = true;
-        const int printThread = 2;
+
         // Worker thread job.
         int a, b, c;
         const int coordsSize = 6;
@@ -186,37 +194,37 @@ int main(int argc, char **argv)
         MPI_Recv(&coords[0], coordsSize, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
 
         if (print && currentThreadId == printThread)
-            printf("Thread %i; Initially received: a=%i b=%i\n", currentThreadId, a, b);
+            printf("Thread %i; Initially received: a=%i b=%i, from master.\n", currentThreadId, a, b);
         c = a * b;
 
-        MPI_Send(&a, 1, MPI_INT, coords[0], WorkerThreadTag, MPI_COMM_WORLD);
-        MPI_Send(&a, 1, MPI_INT, coords[1], WorkerThreadTag, MPI_COMM_WORLD);
-        MPI_Send(&a, 1, MPI_INT, coords[2], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&b, 1, MPI_INT, coords[0], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&b, 1, MPI_INT, coords[1], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&b, 1, MPI_INT, coords[2], WorkerThreadTag, MPI_COMM_WORLD);
 
-        MPI_Send(&b, 1, MPI_INT, coords[3], WorkerThreadTag, MPI_COMM_WORLD);
-        MPI_Send(&b, 1, MPI_INT, coords[4], WorkerThreadTag, MPI_COMM_WORLD);
-        MPI_Send(&b, 1, MPI_INT, coords[5], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&a, 1, MPI_INT, coords[3], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&a, 1, MPI_INT, coords[4], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&a, 1, MPI_INT, coords[5], WorkerThreadTag, MPI_COMM_WORLD);
 
         int a1, a2, a3, b1, b2, b3;
-        MPI_Recv(&a1, 1, MPI_INT, coords[2], WorkerThreadTag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&b1, 1, MPI_INT, coords[5], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&b1, 1, MPI_INT, coords[2], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&a1, 1, MPI_INT, coords[5], WorkerThreadTag, MPI_COMM_WORLD, &status);
 
         if (print && currentThreadId == printThread)
-            printf("Thread %i; received: a1=%i b1=%i\n", currentThreadId, a1, b1);
+            printf("Thread %i; received: a1=%i b1=%i, from %i and %i\n", currentThreadId, a1, b1, coords[5], coords[2]);
         c += (a1 * b1);
 
-        MPI_Recv(&a2, 1, MPI_INT, coords[1], WorkerThreadTag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&b2, 1, MPI_INT, coords[4], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&b2, 1, MPI_INT, coords[1], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&a2, 1, MPI_INT, coords[4], WorkerThreadTag, MPI_COMM_WORLD, &status);
 
         if (print && currentThreadId == printThread)
-            printf("Thread %i; received: a2=%i b2=%i\n", currentThreadId, a2, b2);
+            printf("Thread %i; received: a2=%i b2=%i, from %i and %i\n", currentThreadId, a2, b2, coords[4], coords[1]);
         c += (a2 * b2);
 
-        MPI_Recv(&a3, 1, MPI_INT, coords[0], WorkerThreadTag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&b3, 1, MPI_INT, coords[3], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&b3, 1, MPI_INT, coords[0], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&a3, 1, MPI_INT, coords[3], WorkerThreadTag, MPI_COMM_WORLD, &status);
 
         if (print && currentThreadId == printThread)
-            printf("Thread %i; received: a3=%i b3=%i\n", currentThreadId, a3, b3);
+            printf("Thread %i; received: a3=%i b3=%i, from %i and %i\n", currentThreadId, a3, b3, coords[0], coords[3]);
         c += (a3 * b3);
 
         //printf("Thread %i, received all data.\n", currentThreadId);
