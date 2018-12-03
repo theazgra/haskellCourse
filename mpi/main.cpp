@@ -117,18 +117,24 @@ int main(int argc, char **argv)
         // Initialize workers.
         for (int threadId = 1; threadId <= MatrixSize; threadId++)
         {
-            ++dimCounter;
             matrix1DOffset = threadId - 1;
-            aReceiver = (threadId + MatrixDim);
-            aReceiver = (aReceiver >= threadCount) ? (aReceiver % threadCount) + 1 : aReceiver;
+
+            aRow = taskRow;
+            aCol = (MatrixDim - 1) - dimCounter - taskRow;
+            aCol = aCol >= 0 ? aCol : aCol + MatrixDim;
+
+            bRow = aCol;
+            bCol = dimCounter;
+
+            //printf("A[r:%i;c:%i] B[r:%i;c:%i]\n", aRow, aCol, bRow, bCol);
 
             int currentMaxB = (taskRow * MatrixDim) + MatrixDim;
-
-            bReceiver = (taskRow * MatrixDim) + dimCounter + 1;
-            bReceiver = (dimCounter == MatrixDim) ? bReceiver - MatrixDim : bReceiver;
+            aReceiver = (threadId + MatrixDim);
+            aReceiver = (aReceiver >= threadCount) ? (aReceiver % threadCount) + 1 : aReceiver;
+            bReceiver = (taskRow * MatrixDim) + dimCounter + 2;
+            bReceiver = ((dimCounter + 1) == MatrixDim) ? bReceiver - MatrixDim : bReceiver;
 
             coords[0] = aReceiver;
-
             tmp = aReceiver + 4;
             coords[1] = tmp >= threadCount ? (tmp % threadCount) + 1 : tmp;
             tmp = coords[1] + 4;
@@ -140,32 +146,24 @@ int main(int argc, char **argv)
             tmp = bReceiver + 2;
             coords[5] = tmp > currentMaxB ? tmp - MatrixDim : tmp;
 
-            aindex = get_index(bCol, bRow, (print && threadId == printThread));
-            bindex = get_index(aCol, aRow, (print && threadId == printThread));
+            if (++dimCounter == MatrixDim)
+            {
+                dimCounter = 0;
+                ++taskRow;
+            }
+
+            aindex = get_index(aRow, aCol, (print && threadId == printThread));
+            bindex = get_index(bRow, bCol, (print && threadId == printThread));
 
             if (print && threadId == printThread)
             {
-                printf("%i to %i,%i,%i and %i,%i,%i\n", threadId, coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-                printf("T%i: A[r:%i;c:%i],B[r:%i;c:%i],A index:%i,B index:%i\n", threadId, bCol, bRow, aCol, aRow, aindex, bindex);
+                //printf("%i to %i,%i,%i and %i,%i,%i\n", threadId, coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
             }
+            printf("T%i: A[r:%i;c:%i],B[r:%i;c:%i],A index:%i,B index:%i\n", threadId, bCol, bRow, aCol, aRow, aindex, bindex);
 
             MPI_Send(&A[aindex], 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
             MPI_Send(&B[bindex], 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
             MPI_Send(&coords[0], coordsSize, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
-
-            if (dimCounter == MatrixDim)
-            {
-                dimCounter = 0;
-
-                aCol = (aCol + 3) % MatrixDim;
-                bCol = (bCol + 1) % MatrixDim;
-                bRow = (bRow + 3) % MatrixDim;
-                ++taskRow;
-            }
-
-            aRow = (aRow + 1) % MatrixDim;
-            aCol = (aCol + (MatrixDim - 1)) % MatrixDim;
-            bRow = (bRow + (MatrixDim - 1)) % MatrixDim;
         }
 
         // Wait for workers.
@@ -206,25 +204,25 @@ int main(int argc, char **argv)
         MPI_Send(&a, 1, MPI_INT, coords[5], WorkerThreadTag, MPI_COMM_WORLD);
 
         int a1, a2, a3, b1, b2, b3;
-        MPI_Recv(&b1, 1, MPI_INT, coords[2], WorkerThreadTag, MPI_COMM_WORLD, &status);
         MPI_Recv(&a1, 1, MPI_INT, coords[5], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&b1, 1, MPI_INT, coords[2], WorkerThreadTag, MPI_COMM_WORLD, &status);
 
         if (print && currentThreadId == printThread)
             printf("Thread %i; received: a1=%i b1=%i, from %i and %i\n", currentThreadId, a1, b1, coords[5], coords[2]);
         c += (a1 * b1);
 
-        MPI_Recv(&b2, 1, MPI_INT, coords[1], WorkerThreadTag, MPI_COMM_WORLD, &status);
         MPI_Recv(&a2, 1, MPI_INT, coords[4], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&b2, 1, MPI_INT, coords[1], WorkerThreadTag, MPI_COMM_WORLD, &status);
 
         if (print && currentThreadId == printThread)
             printf("Thread %i; received: a2=%i b2=%i, from %i and %i\n", currentThreadId, a2, b2, coords[4], coords[1]);
         c += (a2 * b2);
 
-        MPI_Recv(&b3, 1, MPI_INT, coords[0], WorkerThreadTag, MPI_COMM_WORLD, &status);
         MPI_Recv(&a3, 1, MPI_INT, coords[3], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&b3, 1, MPI_INT, coords[0], WorkerThreadTag, MPI_COMM_WORLD, &status);
 
         if (print && currentThreadId == printThread)
-            printf("Thread %i; received: a3=%i b3=%i, from %i and %i\n", currentThreadId, a3, b3, coords[0], coords[3]);
+            printf("Thread %i; received: a3=%i b3=%i, from %i and %i\n", currentThreadId, a3, b3, coords[3], coords[0]);
         c += (a3 * b3);
 
         //printf("Thread %i, received all data.\n", currentThreadId);
