@@ -1,8 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <assert.h>
+#include <math.h>
 // Hardcoded include for vscode. #include <mpi.h> can be used.
 #include "/usr/include/openmpi/mpi.h"
+
+static std::vector<int> test_expected = {
+    1380, 1416, 1452, 1488, 1524, 1560, 1596, 1632, 3236, 3336, 3436, 3536, 3636, 3736, 3836, 3936, 5092, 5256, 5420, 5584, 5748, 5912, 6076, 6240, 6948, 7176, 7404, 7632, 7860, 8088, 8316, 8544, 8804, 9096, 9388, 9680, 9972, 10264, 10556, 10848, 10660, 11016, 11372, 11728, 12084, 12440, 12796, 13152, 12516, 12936, 13356, 13776, 14196, 14616, 15036, 15456, 14372, 14856, 15340, 15824, 16308, 16792, 17276, 17760};
 
 // Test case    A matrix all values = 2
 //              B matrix all values = 3
@@ -21,6 +25,25 @@ inline uint get_index(const uint &row, const uint &col)
     return result;
 }
 
+inline uint get_index(const uint &row, const uint &col, const uint partitionDim)
+{
+    return ((row * partitionDim) + col);
+}
+
+void check_result(const std::vector<int> &mat, const std::vector<int> &expected)
+{
+    for (size_t i = 0; i < mat.size(); i++)
+    {
+        if (mat[i] != expected[i])
+        {
+            printf("!!!MULTIPLICATION FAILED!!!\nExpected: %i, but got %i\n", expected[i], mat[i]);
+            return;
+        }
+    }
+
+    printf("MULTIPLICATION OK.\n");
+}
+
 void check_result(const std::vector<int> &mat)
 {
     bool failed = false;
@@ -30,7 +53,7 @@ void check_result(const std::vector<int> &mat)
         {
             if (mat[get_index(row, col)] != ExpectedResult)
             {
-                printf("!!!MULTIPLICATION FAILED!!!\n");
+                printf("!!!MULTIPLICATION FAILED!!!\nExpected: %i, but got %i\n", ExpectedResult, mat[get_index(row, col)]);
                 return;
             }
         }
@@ -44,17 +67,43 @@ inline uint get_matrix_size()
 }
 
 template <typename T>
-void print_matrix(const std::vector<T> &mat, const uint dim)
+void print_vector(const std::vector<T> &vec)
 {
+    size_t vs = vec.size();
+    for (size_t i = 0; i < vs; i++)
+    {
+        if (i == vs - 1)
+            printf("%i \n", vec[i]);
+        else
+            printf("%i, ", vec[i]);
+    }
+}
+
+template <typename T>
+void print_matrix(const std::vector<T> &mat)
+{
+    uint dim = (uint)sqrt(mat.size());
 
     for (uint row = 0; row < dim; row++)
     {
         for (uint col = 0; col < dim; col++)
         {
-            printf("%i ", mat.at((row * MatrixDim) + col));
+            printf("%i\t", mat.at((row * MatrixDim) + col));
         }
         printf("\n");
     }
+    printf("\n");
+}
+
+std::vector<int> generate_test_matrix(const uint size)
+{
+    std::vector<int> result;
+    result.reserve(size);
+    for (size_t i = 0; i < size; i++)
+    {
+        result.push_back((i + 1));
+    }
+    return result;
 }
 
 template <typename T>
@@ -74,15 +123,39 @@ std::vector<T> get_partition(const std::vector<T> &mat, const uint fromRow, cons
 {
     std::vector<T> result;
 
+    uint actualFromRow = (fromRow * partitionDim);
+    uint actualToRow = actualFromRow + partitionDim;
+
+    uint actualFromCol = (fromCol * partitionDim);
+    uint actualToCol = actualFromCol + partitionDim;
+
     result.reserve((partitionDim * partitionDim));
-    for (uint row = fromRow; row < (fromRow + partitionDim); row++)
+    for (uint row = actualFromRow; row < actualToRow; row++)
     {
-        for (uint col = fromCol; col < (fromCol + partitionDim); col++)
+        for (uint col = actualFromCol; col < actualToCol; col++)
         {
             result.push_back(mat[get_index(row, col)]);
         }
     }
     return result;
+}
+template <typename T>
+void insert_to_matrix(std::vector<T> &C, const std::vector<T> &received, const uint fromRow, const uint fromCol, const uint partitionDim)
+{
+    uint actualFromRow = (fromRow * partitionDim);
+    uint actualToRow = actualFromRow + partitionDim;
+
+    uint actualFromCol = (fromCol * partitionDim);
+    uint actualToCol = actualFromCol + partitionDim;
+
+    int index = -1;
+    for (uint row = actualFromRow; row < actualToRow; row++)
+    {
+        for (uint col = actualFromCol; col < actualToCol; col++)
+        {
+            C[get_index(row, col)] = received[++index];
+        }
+    }
 }
 
 int main(int argc, char **argv)
@@ -90,8 +163,10 @@ int main(int argc, char **argv)
     int threadCount;
     int currentThreadId;
 
-    MatrixDim = 4;
-    ExpectedResult = 24;
+    MatrixDim = 8;
+    ExpectedResult = 48;
+    const bool print = true;
+    const int printThread = 1;
 
     // MPI initializations
     MPI_Status status;
@@ -99,14 +174,16 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &threadCount);
     MPI_Comm_rank(MPI_COMM_WORLD, &currentThreadId);
 
-    if (threadCount != 17)
+    int workerCount = threadCount - 1;
+    uint partitionDim = (MatrixDim / (uint)sqrt(workerCount));
+    uint partitionSize = (partitionDim * partitionDim);
+
+    if (workerCount != 16)
     {
         // For testing we require 16 workers.
-        printf("We require 17 threads for testing!\n");
+        printf("We require 16 worker threads for testing!\n");
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
-    const bool print = true;
-    const int printThread = 5;
     if (currentThreadId == MasterThreadId)
     {
         /*
@@ -127,8 +204,10 @@ int main(int argc, char **argv)
         */
 
         // Initialization and work distribution in master thread.
-        std::vector<int> A = generate_matrix(get_matrix_size(), 2);
-        std::vector<int> B = generate_matrix(get_matrix_size(), 3);
+        std::vector<int> A = generate_test_matrix(get_matrix_size());
+        std::vector<int> B = generate_test_matrix(get_matrix_size());
+        print_matrix(A);
+        print_matrix(B);
         std::vector<int> C = generate_matrix(get_matrix_size(), 0);
 
         assert(A.size() == get_matrix_size());
@@ -137,44 +216,42 @@ int main(int argc, char **argv)
 
         printf("Generated matrices, distributing work...\n");
 
-        int matrix1DOffset;
         int aRow = 0;
         int aCol = 3;
         int bRow = 3;
         int bCol = 0;
         int dimCounter = 0;
-        const int jobInfoArraySize = 6;
-        int jobInfo[jobInfoArraySize];
+        const int jobInfoArraySize = 10;
+        int jobInfo[jobInfoArraySize]; // 0 1 2 A threads, 3 4 5 B threads, 6 aRow, 7 aCol, 8 bRow, 9 bCol
         int aReceiver = 2;
         int bReceiver = 5;
         int taskRow = 0;
         int tmp;
-        int aindex, bindex;
+
+        const int taskMeshDim = 4;
 
         // Initialize workers.
-        for (int threadId = 1; threadId <= get_matrix_size(); threadId++)
+        for (int threadId = 1; threadId <= workerCount; threadId++)
         {
-            matrix1DOffset = threadId - 1;
-
             aRow = taskRow;
-            aCol = (MatrixDim - 1) - dimCounter - taskRow;
-            aCol = aCol >= 0 ? aCol : aCol + MatrixDim;
+            aCol = (taskMeshDim - 1) - dimCounter - taskRow;
+            aCol = aCol >= 0 ? aCol : aCol + taskMeshDim;
 
             bRow = aCol;
             bCol = dimCounter;
 
-            aReceiver = (taskRow * MatrixDim) + dimCounter + 2;
-            aReceiver = ((dimCounter + 1) == MatrixDim) ? aReceiver - MatrixDim : aReceiver;
-            int currentMaxA = (taskRow * MatrixDim) + MatrixDim;
+            aReceiver = (taskRow * taskMeshDim) + dimCounter + 2;
+            aReceiver = ((dimCounter + 1) == taskMeshDim) ? aReceiver - taskMeshDim : aReceiver;
+            int currentMaxA = (taskRow * taskMeshDim) + taskMeshDim;
 
-            bReceiver = (threadId + MatrixDim);
+            bReceiver = (threadId + taskMeshDim);
             bReceiver = (bReceiver >= threadCount) ? (bReceiver % threadCount) + 1 : bReceiver;
 
             jobInfo[0] = aReceiver;
             tmp = aReceiver + 1;
-            jobInfo[1] = tmp > currentMaxA ? tmp - MatrixDim : tmp;
+            jobInfo[1] = tmp > currentMaxA ? tmp - taskMeshDim : tmp;
             tmp = aReceiver + 2;
-            jobInfo[2] = tmp > currentMaxA ? tmp - MatrixDim : tmp;
+            jobInfo[2] = tmp > currentMaxA ? tmp - taskMeshDim : tmp;
 
             jobInfo[3] = bReceiver;
             tmp = bReceiver + 4;
@@ -182,108 +259,165 @@ int main(int argc, char **argv)
             tmp = jobInfo[4] + 4;
             jobInfo[5] = tmp >= threadCount ? (tmp % threadCount) + 1 : tmp;
 
-            if (++dimCounter == MatrixDim)
+            if (++dimCounter == taskMeshDim)
             {
                 dimCounter = 0;
                 ++taskRow;
             }
 
-            aindex = get_index(aRow, aCol);
-            bindex = get_index(bRow, bCol);
-
             // if (print && threadId == printThread)
             // {
             //     printf("%i to %i,%i,%i and %i,%i,%i\n", threadId, jobInfo[0], jobInfo[1], jobInfo[2], jobInfo[3], jobInfo[4], jobInfo[5]);
-            //     printf("T%i: A[r:%i;c:%i],B[r:%i;c:%i],A index:%i,B index:%i\n", threadId, aRow, aCol, bRow, bCol, aindex, bindex);
+
             // }
 
-            MPI_Send(&A[aindex], 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
-            MPI_Send(&B[bindex], 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
+            jobInfo[6] = aRow;
+            jobInfo[7] = aCol;
+            jobInfo[8] = bRow;
+            jobInfo[9] = bCol;
+
+            auto aPartition = get_partition(A, aRow, aCol, partitionDim);
+            auto bPartition = get_partition(B, bRow, bCol, partitionDim);
+
+            // printf("T%i: A[r:%i;c:%i],B[r:%i;c:%i]\n", threadId, aRow, aCol, bRow, bCol);
+            // printf("T:%i;Partition A:\n", threadId);
+            // print_vector(aPartition);
+            // printf("T:%i;Partition B:\n", threadId);
+            // print_vector(bPartition);
+
+            MPI_Send(&aPartition[0], partitionSize, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
+            MPI_Send(&bPartition[0], partitionSize, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
             MPI_Send(&jobInfo[0], jobInfoArraySize, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
         }
 
         // Wait for workers.
-        for (int threadId = 1; threadId <= get_matrix_size(); threadId++)
+        for (int threadId = 1; threadId <= workerCount; threadId++)
         {
-            int c;
-            MPI_Recv(&c, 1, MPI_INT, threadId, WorkerThreadTag, MPI_COMM_WORLD, &status);
+            std::vector<int> received;
+            int info[2]; // 1 fromRow, 2 fromCol
+            received.clear();
+            received.resize(partitionSize);
 
-            matrix1DOffset = threadId - 1;
-            if (c == 57)
-            {
-                printf("Receiver 57 from thread %i.Saving at index %i\n", threadId, matrix1DOffset);
-            }
-            C.at(matrix1DOffset) = c;
+            MPI_Recv(&received[0], partitionSize, MPI_INT, threadId, WorkerThreadTag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&info[0], 2, MPI_INT, threadId, WorkerThreadTag, MPI_COMM_WORLD, &status);
+
+            insert_to_matrix(C, received, info[0], info[1], partitionDim);
         }
         printf("Received result from all threads.\nResult:\n");
-        check_result(C);
-        print_matrix(C, 4);
+        check_result(C, test_expected);
+        print_matrix(C);
     }
 
     if (currentThreadId != MasterThreadId)
     {
-
         // Worker thread job.
-        int a, b, c;
-        c = 0;
-        const int jobInfoArraySize = 6;
+        const int jobInfoArraySize = 10;
         int jobInfo[jobInfoArraySize];
+        uint aRow, aCol, bRow, bCol;
 
-        MPI_Recv(&a, 1, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&b, 1, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
+        std::vector<int> A;
+        std::vector<int> B;
+        std::vector<int> C;
+        A.resize(partitionSize);
+        B.resize(partitionSize);
+        C.resize(partitionSize);
+
+        MPI_Recv(&A[0], partitionSize, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&B[0], partitionSize, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
         MPI_Recv(&jobInfo[0], jobInfoArraySize, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
 
-        if (print && currentThreadId == printThread)
-        {
-            printf("Thread %i; Initially received: a=%i b=%i, from master.\n", currentThreadId, a, b);
-            printf("c = %i\n", c);
-        }
-        c = a * b;
-        if (print && currentThreadId == printThread)
-            printf("c = %i\n", c);
-
-        MPI_Send(&a, 1, MPI_INT, jobInfo[0], WorkerThreadTag, MPI_COMM_WORLD);
-        MPI_Send(&a, 1, MPI_INT, jobInfo[1], WorkerThreadTag, MPI_COMM_WORLD);
-        MPI_Send(&a, 1, MPI_INT, jobInfo[2], WorkerThreadTag, MPI_COMM_WORLD);
-
-        MPI_Send(&b, 1, MPI_INT, jobInfo[3], WorkerThreadTag, MPI_COMM_WORLD);
-        MPI_Send(&b, 1, MPI_INT, jobInfo[4], WorkerThreadTag, MPI_COMM_WORLD);
-        MPI_Send(&b, 1, MPI_INT, jobInfo[5], WorkerThreadTag, MPI_COMM_WORLD);
-
-        MPI_Recv(&a, 1, MPI_INT, jobInfo[0], WorkerThreadTag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&b, 1, MPI_INT, jobInfo[3], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        aRow = jobInfo[6];
+        aCol = jobInfo[7];
+        bRow = jobInfo[8];
+        bCol = jobInfo[9];
+        uint index;
 
         if (print && currentThreadId == printThread)
         {
-            printf("Thread %i; received: a1=%i b1=%i, from %i and %i\n", currentThreadId, a, b, jobInfo[5], jobInfo[2]);
-            printf("c = %i\n", c);
+            printf("Thread %i; Initially received:\n", currentThreadId);
+
+            print_vector(A);
+            print_vector(B);
         }
-        c += (a * b);
-        if (print && currentThreadId == printThread)
-            printf("c = %i\n", c);
 
-        MPI_Recv(&a, 1, MPI_INT, jobInfo[1], WorkerThreadTag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&b, 1, MPI_INT, jobInfo[4], WorkerThreadTag, MPI_COMM_WORLD, &status);
-
-        if (print && currentThreadId == printThread)
-            printf("Thread %i; received: a2=%i b2=%i, from %i and %i\n", currentThreadId, a, b, jobInfo[4], jobInfo[1]);
-        c += (a * b);
-
-        MPI_Recv(&a, 1, MPI_INT, jobInfo[2], WorkerThreadTag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&b, 1, MPI_INT, jobInfo[5], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        for (uint resRow = 0; resRow < partitionDim; resRow++)
+            for (uint resCol = 0; resCol < partitionDim; resCol++)
+                for (uint aCol = 0; aCol < partitionDim; aCol++)
+                    C[get_index(resRow, resCol, partitionDim)] += (A[get_index(resRow, aCol, partitionDim)] * B[get_index(aCol, resCol, partitionDim)]);
 
         if (print && currentThreadId == printThread)
         {
-            printf("Thread %i; received: a3=%i b3=%i, from %i and %i\n", currentThreadId, a, b, jobInfo[3], jobInfo[0]);
-            printf("c = %i\n", c);
+            printf("After first ff:\n");
+            print_vector(C);
         }
-        c += (a * b);
+
+        MPI_Send(&A[0], partitionSize, MPI_INT, jobInfo[0], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&A[0], partitionSize, MPI_INT, jobInfo[1], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&A[0], partitionSize, MPI_INT, jobInfo[2], WorkerThreadTag, MPI_COMM_WORLD);
+
+        MPI_Send(&B[0], partitionSize, MPI_INT, jobInfo[3], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&B[0], partitionSize, MPI_INT, jobInfo[4], WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&B[0], partitionSize, MPI_INT, jobInfo[5], WorkerThreadTag, MPI_COMM_WORLD);
+
+        MPI_Recv(&A[0], partitionSize, MPI_INT, jobInfo[0], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&B[0], partitionSize, MPI_INT, jobInfo[3], WorkerThreadTag, MPI_COMM_WORLD, &status);
+
         if (print && currentThreadId == printThread)
-            printf("c = %i\n", c);
+        {
+            printf("Thread %i; received 1:\n", currentThreadId);
 
-        //printf("Thread %i, received all data.\n", currentThreadId);
+            print_vector(A);
+            print_vector(B);
+        }
 
-        MPI_Send(&c, 1, MPI_INT, MasterThreadId, WorkerThreadTag, MPI_COMM_WORLD);
+        for (uint resRow = 0; resRow < partitionDim; resRow++)
+            for (uint resCol = 0; resCol < partitionDim; resCol++)
+                for (uint aCol = 0; aCol < partitionDim; aCol++)
+                    C[get_index(resRow, resCol, partitionDim)] += (A[get_index(resRow, aCol, partitionDim)] * B[get_index(aCol, resCol, partitionDim)]);
+
+        MPI_Recv(&A[0], partitionSize, MPI_INT, jobInfo[1], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&B[0], partitionSize, MPI_INT, jobInfo[4], WorkerThreadTag, MPI_COMM_WORLD, &status);
+
+        if (print && currentThreadId == printThread)
+        {
+            printf("Thread %i; received 2:\n", currentThreadId);
+
+            print_vector(A);
+            print_vector(B);
+        }
+
+        for (uint resRow = 0; resRow < partitionDim; resRow++)
+            for (uint resCol = 0; resCol < partitionDim; resCol++)
+                for (uint aCol = 0; aCol < partitionDim; aCol++)
+                    C[get_index(resRow, resCol, partitionDim)] += (A[get_index(resRow, aCol, partitionDim)] * B[get_index(aCol, resCol, partitionDim)]);
+
+        MPI_Recv(&A[0], partitionSize, MPI_INT, jobInfo[2], WorkerThreadTag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&B[0], partitionSize, MPI_INT, jobInfo[5], WorkerThreadTag, MPI_COMM_WORLD, &status);
+
+        if (print && currentThreadId == printThread)
+        {
+            printf("Thread %i; received 3:\n", currentThreadId);
+
+            print_vector(A);
+            print_vector(B);
+        }
+
+        for (uint resRow = 0; resRow < partitionDim; resRow++)
+            for (uint resCol = 0; resCol < partitionDim; resCol++)
+                for (uint aCol = 0; aCol < partitionDim; aCol++)
+                    C[get_index(resRow, resCol, partitionDim)] += (A[get_index(resRow, aCol, partitionDim)] * B[get_index(aCol, resCol, partitionDim)]);
+
+        int info[2];
+        info[0] = aRow;
+        info[1] = bCol;
+
+        if (print && currentThreadId == printThread)
+        {
+            printf("Returning from T:%i, Should insert at: %i;%i\n", currentThreadId, aRow, bCol);
+            print_vector(C);
+        }
+        MPI_Send(&C[0], partitionSize, MPI_INT, MasterThreadId, WorkerThreadTag, MPI_COMM_WORLD);
+        MPI_Send(&info[0], 2, MPI_INT, MasterThreadId, WorkerThreadTag, MPI_COMM_WORLD);
     }
 
     MPI_Finalize();
