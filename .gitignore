@@ -40,3 +40,4 @@ Build/
 *.dvi
 *.synctex*
 mpi/mpi_example.cpp
+mpi/main_bck.cpp

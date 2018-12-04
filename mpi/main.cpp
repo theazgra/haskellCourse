@@ -165,9 +165,9 @@ std::vector<std::vector<uint>> get_partition_indexes(const std::vector<T> &mat, 
             innerIndexes.push_back(get_index(row, col));
         }
         indexes.push_back(innerIndexes);
-        print_vector(innerIndexes);
+        //print_vector(innerIndexes);
     }
-    printf("\n\n");
+    //printf("\n\n");
     return indexes;
 }
 
@@ -187,10 +187,10 @@ std::vector<uint> pack_indexes(const std::vector<std::vector<uint>> &indexes)
     return packed;
 }
 
-std::vector<uint> unpack_indexes(const std::vector<uint> &packed)
+std::vector<std::vector<uint>> unpack_indexes(const std::vector<uint> &packed)
 {
     assert((packed.size() % 2) == 0);
-    std::vector<uint> unpacked;
+    std::vector<std::vector<uint>> unpacked;
 
     uint first, last;
 
@@ -199,10 +199,13 @@ std::vector<uint> unpack_indexes(const std::vector<uint> &packed)
         first = packed[i];
         last = packed[i + 1];
 
+        std::vector<uint> inner;
+        inner.reserve(last - first);
+
         for (uint index = first; index <= last; index++)
-        {
-            unpacked.push_back(index);
-        }
+            inner.push_back(index);
+
+        unpacked.push_back(inner);
     }
 
     return unpacked;
@@ -232,7 +235,7 @@ int main(int argc, char **argv)
     int threadCount;
     int currentThreadId;
 
-    MatrixDim = 32;
+    MatrixDim = 64;
     ExpectedResult = MatrixDim * 6;
     const bool print = false;
     const int printThread = 1;
@@ -336,18 +339,10 @@ int main(int argc, char **argv)
                 ++taskRow;
             }
 
-            // if (print && threadId == printThread)
-            // {
-            //     printf("%i to %i,%i,%i and %i,%i,%i\n", threadId, jobInfo[0], jobInfo[1], jobInfo[2], jobInfo[3], jobInfo[4], jobInfo[5]);
-
-            // }
-
             jobInfo[6] = aRow;
             jobInfo[7] = aCol;
             jobInfo[8] = bRow;
             jobInfo[9] = bCol;
-
-            auto q = get_partition_indexes(A, aRow, aCol, partitionDim);
 
             auto aPartition = get_partition(A, aRow, aCol, partitionDim);
             auto bPartition = get_partition(B, bRow, bCol, partitionDim);
@@ -357,6 +352,21 @@ int main(int argc, char **argv)
             // print_vector(aPartition);
             // printf("T:%i;Partition B:\n", threadId);
             // print_vector(bPartition);
+
+            // auto aPart = pack_indexes(get_partition_indexes(A, aRow, aCol, partitionDim));
+            // auto bPart = pack_indexes(get_partition_indexes(B, bRow, bCol, partitionDim));
+
+            // int aps = aPart.size();
+            // int bps = bPart.size();
+
+            // MPI_Send(&aps, 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
+            // MPI_Send(&bps, 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
+
+            // MPI_Send(&A[0], 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
+            // MPI_Send(&B[0], 1, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
+
+            // MPI_Send(&aPart[0], aPart.size(), MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
+            // MPI_Send(&aPart[0], aPart.size(), MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
 
             MPI_Send(&aPartition[0], partitionSize, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
             MPI_Send(&bPartition[0], partitionSize, MPI_INT, threadId, MasterThreadTag, MPI_COMM_WORLD);
@@ -396,6 +406,25 @@ int main(int argc, char **argv)
         A.resize(partitionSize);
         B.resize(partitionSize);
         C.resize(partitionSize);
+
+        // std::vector<uint> aIndexes;
+        // std::vector<uint> bIndexes;
+
+        // int aPointer, bPointer, aIndSize, bIndSize;
+
+        // MPI_Recv(&aIndSize, 1, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
+        // MPI_Recv(&bIndSize, 1, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
+
+        // MPI_Recv(&aPointer, 1, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
+        // MPI_Recv(&bPointer, 1, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
+
+        // MPI_Recv(&bIndexes[0], aIndSize, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
+        // MPI_Recv(&bIndexes[0], bIndSize, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
+
+        // std::vector<std::vector<uint>> unpackedAIndexes = unpack_indexes(aIndexes);
+        // std::vector<std::vector<uint>> unpackedBIndexes = unpack_indexes(bIndexes);
+
+        //int value = *reinterpret_cast<int *>(aPointer + aIndexes[0]);
 
         MPI_Recv(&A[0], partitionSize, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
         MPI_Recv(&B[0], partitionSize, MPI_INT, MasterThreadId, MasterThreadTag, MPI_COMM_WORLD, &status);
