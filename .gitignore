@@ -29,3 +29,15 @@ obj/
 Obj/
 x64/
 x86/
+[Bb]uild/
+build/
+Build/
+*.idx
+*.aux
+*.toc
+*.log
+*.out
+*.dvi
+*.synctex*
+mpi/mpi_example.cpp
+mpi/main_bck.cpp

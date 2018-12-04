@@ -1,0 +1,171 @@
+BENCHMARK for Array Matrices, dimensions 1000 x 1000
+Starting single-threaded, no open-mp multiplication.
+===========================================SINGLE-THREAD==================================
+[basic_multiplication_1], average time for 5 samples: 3225.600000 ms.
+[basic_mult_1_with_tmp],  average time for 5 samples: 3347.600000 ms.
+[basic_multiplication_2], average time for 5 samples: 2999.200000 ms.
+[basic_multiplication_3], average time for 5 samples: 3059.600000 ms.
+[basic_mult_3_with_tmp],  average time for 5 samples: 3222.400000 ms.
+[basic_multiplication_4], average time for 5 samples: 6787.200000 ms.
+[basic_multiplication_5], average time for 5 samples: 2978.400000 ms.
+[basic_multiplication_6], average time for 5 samples: 6731.200000 ms.
+==========================================================================================
+
+Starting Open-MP benchmark for 1 threads.
+========================OPEN-MP-1-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 5052.200000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 7017.400000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 4722.600000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 3228.000000 ms.
+[openmp_multiplication_2], average time for 5 samples: 4223.600000 ms.
+[openmp_multiplication_3], average time for 5 samples: 4535.000000 ms.
+[openmp_multiplication_4], average time for 5 samples: 7785.800000 ms.
+[openmp_multiplication_5], average time for 5 samples: 7317.600000 ms.
+[openmp_multiplication_6], average time for 5 samples: 10000.800000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 2 threads.
+========================OPEN-MP-2-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 2489.800000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 3469.200000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 2378.000000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 1624.200000 ms.
+[openmp_multiplication_2], average time for 5 samples: 2125.600000 ms.
+[openmp_multiplication_3], average time for 5 samples: 2281.000000 ms.
+[openmp_multiplication_4], average time for 5 samples: 3760.200000 ms.
+[openmp_multiplication_5], average time for 5 samples: 3689.800000 ms.
+[openmp_multiplication_6], average time for 5 samples: 5783.200000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 3 threads.
+========================OPEN-MP-3-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 1687.200000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 2351.800000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1610.600000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 1102.600000 ms.
+[openmp_multiplication_2], average time for 5 samples: 1437.400000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1545.200000 ms.
+[openmp_multiplication_4], average time for 5 samples: 2549.200000 ms.
+[openmp_multiplication_5], average time for 5 samples: 2497.000000 ms.
+[openmp_multiplication_6], average time for 5 samples: 6351.800000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 4 threads.
+========================OPEN-MP-4-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 1297.800000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1829.600000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1276.000000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 879.400000 ms.
+[openmp_multiplication_2], average time for 5 samples: 1138.800000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1235.200000 ms.
+[openmp_multiplication_4], average time for 5 samples: 2022.000000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1913.600000 ms.
+[openmp_multiplication_6], average time for 5 samples: 3749.000000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 5 threads.
+========================OPEN-MP-5-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 1188.400000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1594.800000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1135.200000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 780.800000 ms.
+[openmp_multiplication_2], average time for 5 samples: 996.600000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1084.200000 ms.
+[openmp_multiplication_4], average time for 5 samples: 1761.400000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1658.600000 ms.
+[openmp_multiplication_6], average time for 5 samples: 3654.000000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 6 threads.
+========================OPEN-MP-6-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 1024.800000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1388.400000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 980.600000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 676.400000 ms.
+[openmp_multiplication_2], average time for 5 samples: 877.600000 ms.
+[openmp_multiplication_3], average time for 5 samples: 950.800000 ms.
+[openmp_multiplication_4], average time for 5 samples: 1531.000000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1448.400000 ms.
+[openmp_multiplication_6], average time for 5 samples: 3119.600000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 7 threads.
+========================OPEN-MP-7-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 1113.000000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1541.000000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1532.600000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 830.000000 ms.
+[openmp_multiplication_2], average time for 5 samples: 945.000000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1154.000000 ms.
+[openmp_multiplication_4], average time for 5 samples: 1786.000000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1567.000000 ms.
+[openmp_multiplication_6], average time for 5 samples: 2853.600000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 8 threads.
+========================OPEN-MP-8-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 1045.000000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1415.800000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1441.200000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 755.600000 ms.
+[openmp_multiplication_2], average time for 5 samples: 868.800000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1041.800000 ms.
+[openmp_multiplication_4], average time for 5 samples: 1629.200000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1469.000000 ms.
+[openmp_multiplication_6], average time for 5 samples: 3030.000000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 9 threads.
+========================OPEN-MP-9-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 1005.800000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1339.600000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1295.200000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 756.200000 ms.
+[openmp_multiplication_2], average time for 5 samples: 811.800000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1013.200000 ms.
+[openmp_multiplication_4], average time for 5 samples: 1609.800000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1367.200000 ms.
+[openmp_multiplication_6], average time for 5 samples: 2762.200000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 10 threads.
+========================OPEN-MP-10-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 991.800000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1284.400000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1210.800000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 735.800000 ms.
+[openmp_multiplication_2], average time for 5 samples: 771.200000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1022.800000 ms.
+[openmp_multiplication_4], average time for 5 samples: 1561.000000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1328.400000 ms.
+[openmp_multiplication_6], average time for 5 samples: 2934.000000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 11 threads.
+========================OPEN-MP-11-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 1034.000000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1280.200000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1185.800000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 734.200000 ms.
+[openmp_multiplication_2], average time for 5 samples: 740.600000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1071.400000 ms.
+[openmp_multiplication_4], average time for 5 samples: 1593.200000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1249.200000 ms.
+[openmp_multiplication_6], average time for 5 samples: 2692.000000 ms.
+===========================================================================
+
+Starting Open-MP benchmark for 12 threads.
+========================OPEN-MP-12-THREADS===============================
+[openmp_multiplication_1], average time for 5 samples: 961.600000 ms.
+[openmp_multipl_1_atomic], average time for 5 samples: 1180.000000 ms.
+[openmp_multiplicati_1_2], average time for 5 samples: 1053.000000 ms.
+[openmp_multiplica_1_tmp], average time for 5 samples: 721.400000 ms.
+[openmp_multiplication_2], average time for 5 samples: 670.400000 ms.
+[openmp_multiplication_3], average time for 5 samples: 1010.400000 ms.
+[openmp_multiplication_4], average time for 5 samples: 1537.200000 ms.
+[openmp_multiplication_5], average time for 5 samples: 1167.800000 ms.
+[openmp_multiplication_6], average time for 5 samples: 2673.800000 ms.
+===========================================================================
+
+
+
