@@ -130,15 +130,84 @@ std::vector<T> get_partition(const std::vector<T> &mat, const uint fromRow, cons
     uint actualToCol = actualFromCol + partitionDim;
 
     result.reserve((partitionDim * partitionDim));
+    uint index;
+
     for (uint row = actualFromRow; row < actualToRow; row++)
     {
         for (uint col = actualFromCol; col < actualToCol; col++)
         {
-            result.push_back(mat[get_index(row, col)]);
+            index = get_index(row, col);
+            result.push_back(mat[index]);
         }
     }
     return result;
 }
+
+template <typename T>
+std::vector<std::vector<uint>> get_partition_indexes(const std::vector<T> &mat, const uint fromRow, const uint fromCol, const uint partitionDim)
+{
+    uint actualFromRow = (fromRow * partitionDim);
+    uint actualToRow = actualFromRow + partitionDim;
+
+    uint actualFromCol = (fromCol * partitionDim);
+    uint actualToCol = actualFromCol + partitionDim;
+
+    std::vector<std::vector<uint>> indexes;
+    indexes.reserve(actualToRow - actualFromRow);
+
+    for (uint row = actualFromRow; row < actualToRow; row++)
+    {
+        std::vector<uint> innerIndexes;
+        innerIndexes.clear();
+        innerIndexes.reserve(actualToCol - actualFromCol);
+        for (uint col = actualFromCol; col < actualToCol; col++)
+        {
+            innerIndexes.push_back(get_index(row, col));
+        }
+        indexes.push_back(innerIndexes);
+        print_vector(innerIndexes);
+    }
+    printf("\n\n");
+    return indexes;
+}
+
+std::vector<uint> pack_indexes(const std::vector<std::vector<uint>> &indexes)
+{
+    std::vector<uint> packed;
+    packed.reserve(indexes.size() * 2);
+    uint first, last;
+    for (const std::vector<uint> &innerIndexes : indexes)
+    {
+        first = innerIndexes[0];
+        last = innerIndexes[innerIndexes.size() - 1];
+
+        packed.push_back(first);
+        packed.push_back(last);
+    }
+    return packed;
+}
+
+std::vector<uint> unpack_indexes(const std::vector<uint> &packed)
+{
+    assert((packed.size() % 2) == 0);
+    std::vector<uint> unpacked;
+
+    uint first, last;
+
+    for (size_t i = 0; i < packed.size(); i += 2)
+    {
+        first = packed[i];
+        last = packed[i + 1];
+
+        for (uint index = first; index <= last; index++)
+        {
+            unpacked.push_back(index);
+        }
+    }
+
+    return unpacked;
+}
+
 template <typename T>
 void insert_to_matrix(std::vector<T> &C, const std::vector<T> &received, const uint fromRow, const uint fromCol, const uint partitionDim)
 {
@@ -163,9 +232,9 @@ int main(int argc, char **argv)
     int threadCount;
     int currentThreadId;
 
-    MatrixDim = 8;
-    ExpectedResult = 48;
-    const bool print = true;
+    MatrixDim = 32;
+    ExpectedResult = MatrixDim * 6;
+    const bool print = false;
     const int printThread = 1;
 
     // MPI initializations
@@ -204,10 +273,12 @@ int main(int argc, char **argv)
         */
 
         // Initialization and work distribution in master thread.
-        std::vector<int> A = generate_test_matrix(get_matrix_size());
-        std::vector<int> B = generate_test_matrix(get_matrix_size());
-        print_matrix(A);
-        print_matrix(B);
+        // std::vector<int> A = generate_test_matrix(get_matrix_size());
+        // std::vector<int> B = generate_test_matrix(get_matrix_size());
+        std::vector<int> A = generate_matrix(get_matrix_size(), 2);
+        std::vector<int> B = generate_matrix(get_matrix_size(), 3);
+        // print_matrix(A);
+        // print_matrix(B);
         std::vector<int> C = generate_matrix(get_matrix_size(), 0);
 
         assert(A.size() == get_matrix_size());
@@ -276,6 +347,8 @@ int main(int argc, char **argv)
             jobInfo[8] = bRow;
             jobInfo[9] = bCol;
 
+            auto q = get_partition_indexes(A, aRow, aCol, partitionDim);
+
             auto aPartition = get_partition(A, aRow, aCol, partitionDim);
             auto bPartition = get_partition(B, bRow, bCol, partitionDim);
 
@@ -304,8 +377,10 @@ int main(int argc, char **argv)
             insert_to_matrix(C, received, info[0], info[1], partitionDim);
         }
         printf("Received result from all threads.\nResult:\n");
-        check_result(C, test_expected);
-        print_matrix(C);
+
+        //check_result(C, test_expected);
+        check_result(C);
+        //print_matrix(C);
     }
 
     if (currentThreadId != MasterThreadId)
