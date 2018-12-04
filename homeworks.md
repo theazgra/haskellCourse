@@ -67,6 +67,6 @@ Course project. Operations with context-free grammar.
     - Result is *document*
 
 ## OpenMPI matrix multiplication
-- [ ] foster matrix multiplication task mesh
+- [x] foster matrix multiplication task mesh
     - https://www.mcs.anl.gov/~itf/dbpp/text/node45.html
     - # of processes 4,9,16,26 

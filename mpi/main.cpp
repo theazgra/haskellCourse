@@ -235,7 +235,7 @@ int main(int argc, char **argv)
     int threadCount;
     int currentThreadId;
 
-    MatrixDim = 64;
+    MatrixDim = 8;
     ExpectedResult = MatrixDim * 6;
     const bool print = false;
     const int printThread = 1;
@@ -276,10 +276,10 @@ int main(int argc, char **argv)
         */
 
         // Initialization and work distribution in master thread.
-        // std::vector<int> A = generate_test_matrix(get_matrix_size());
-        // std::vector<int> B = generate_test_matrix(get_matrix_size());
-        std::vector<int> A = generate_matrix(get_matrix_size(), 2);
-        std::vector<int> B = generate_matrix(get_matrix_size(), 3);
+        std::vector<int> A = generate_test_matrix(get_matrix_size());
+        std::vector<int> B = generate_test_matrix(get_matrix_size());
+        // std::vector<int> A = generate_matrix(get_matrix_size(), 2);
+        // std::vector<int> B = generate_matrix(get_matrix_size(), 3);
         // print_matrix(A);
         // print_matrix(B);
         std::vector<int> C = generate_matrix(get_matrix_size(), 0);
@@ -388,9 +388,9 @@ int main(int argc, char **argv)
         }
         printf("Received result from all threads.\nResult:\n");
 
-        //check_result(C, test_expected);
-        check_result(C);
-        //print_matrix(C);
+        check_result(C, test_expected);
+        //check_result(C);
+        print_matrix(C);
     }
 
     if (currentThreadId != MasterThreadId)
@@ -434,7 +434,6 @@ int main(int argc, char **argv)
         aCol = jobInfo[7];
         bRow = jobInfo[8];
         bCol = jobInfo[9];
-        uint index;
 
         if (print && currentThreadId == printThread)
         {
